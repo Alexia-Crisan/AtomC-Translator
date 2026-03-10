@@ -7,7 +7,7 @@
 
 // prints to stderr a message prefixed with "error: " and exit the program
 // the arguments are the same as for printf
-//noreturn void err(const char *fmt,...);
+// noreturn void err(const char *fmt,...);
 void err(const char* fmt, ...);
 
 // allocs memory using malloc
