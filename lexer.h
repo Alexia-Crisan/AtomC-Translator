@@ -4,11 +4,15 @@ enum
 {
 	ID
 	// keywords
-	,TYPE_CHAR
+	, TYPE_CHAR, TYPE_DOUBLE, TYPE_INT
+	, IF, ELSE, WHILE, RETURN, VOID, STRUCT
 	// delimiters
-	,COMMA,END
+	, COMMA, SEMICOLON, LPAR, RPAR, LACC, RACC, END
 	// operators
-	,ASSIGN,EQUAL
+	, ASSIGN, EQUAL, ADD, SUB, MUL, DIV, LESS, LESSEQ
+	, GREATER, GREATEREQ, NOTEQ, NOT, AND, OR
+	// constants
+	, INT, DOUBLE, CHAR, STRING
 };
 
 typedef struct Token
