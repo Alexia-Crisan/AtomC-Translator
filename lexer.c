@@ -55,18 +55,6 @@ Token *tokenize(const char *pch)
 				pch++;
 				break;
 			case '\0': addTk(END); return tokens;
-			case '=':
-				if(pch[1]=='=')
-				{
-					addTk(EQUAL);
-					pch+=2;
-				}
-				else
-				{
-					addTk(ASSIGN);
-					pch++;
-				}
-				break;
 			
 			// delimiters
 			case ',': addTk(COMMA);     pch++; break;
@@ -75,6 +63,42 @@ Token *tokenize(const char *pch)
 			case ')': addTk(RPAR);      pch++; break;
 			case '{': addTk(LACC);      pch++; break;
 			case '}': addTk(RACC);      pch++; break;
+
+			// operators
+			case '+': addTk(ADD); pch++; break;
+			case '-': addTk(SUB); pch++; break;
+			case '*': addTk(MUL); pch++; break;
+
+			case '=':
+				if (pch[1] == '=') { addTk(EQUAL); pch += 2; }
+				else { addTk(ASSIGN); pch++; }
+				break;
+
+			case '<':
+				if (pch[1] == '=') { addTk(LESSEQ); pch += 2; }
+				else { addTk(LESS); pch++; }
+				break;
+
+
+			case '>':
+				if (pch[1] == '=') { addTk(GREATEREQ); pch += 2; }
+				else { addTk(GREATER); pch++; }
+				break;
+
+			case '!':
+				if (pch[1] == '=') { addTk(NOTEQ); pch += 2; }
+				else { addTk(NOT); pch++; }
+				break;
+
+			case '&':
+				if (pch[1] == '&') { addTk(AND); pch += 2; }
+				else err("Invalid char: %c (%d)", *pch, *pch);
+				break;
+
+			case '|':
+				if (pch[1] == '|') { addTk(OR); pch += 2; }
+				else err("Invalid char: %c (%d)", *pch, *pch);
+				break;
 
 			default:
 				if(isalpha(*pch) || *pch == '_')
