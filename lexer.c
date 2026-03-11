@@ -32,9 +32,13 @@ Token *addTk(int code)
 	return tk;
 }
 
-char *extract(const char *begin,const char *end)
+char *extract(const char *begin, const char *end)
 {
-	err("extract needs to be implemented");
+	int len = (size_t)(end - begin);
+	char* buf = (char*)safeAlloc(len + 1);
+	memcpy(buf, begin, len);
+	buf[len] = '\0';
+	return buf;
 }
 
 Token *tokenize(const char *pch)
