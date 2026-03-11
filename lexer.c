@@ -46,7 +46,7 @@ Token *tokenize(const char *pch)
 	{
 		switch(*pch)
 		{
-			case ' ':case '\t': pch++; break;
+			case ' ': case '\t': pch++; break;
 			case '\r':		// handles different kinds of newlines (Windows: \r\n, Linux: \n, MacOS, OS X: \r or \n)
 				if(pch[1]=='\n')pch++;
 				// fallthrough to \n
@@ -55,7 +55,6 @@ Token *tokenize(const char *pch)
 				pch++;
 				break;
 			case '\0': addTk(END); return tokens;
-			case ',': addTk(COMMA); pch++; break;
 			case '=':
 				if(pch[1]=='=')
 				{
@@ -68,6 +67,15 @@ Token *tokenize(const char *pch)
 					pch++;
 				}
 				break;
+			
+			// delimiters
+			case ',': addTk(COMMA);     pch++; break;
+			case ';': addTk(SEMICOLON); pch++; break;
+			case '(': addTk(LPAR);      pch++; break;
+			case ')': addTk(RPAR);      pch++; break;
+			case '{': addTk(LACC);      pch++; break;
+			case '}': addTk(RACC);      pch++; break;
+
 			default:
 				if(isalpha(*pch) || *pch == '_')
 				{
