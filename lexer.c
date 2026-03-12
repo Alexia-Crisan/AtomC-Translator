@@ -29,10 +29,10 @@ Token *addTk(int code)
 char *extract(const char *begin, const char *end)
 {
 	int len = (size_t)(end - begin);
-	char* buf = (char*)safeAlloc(len + 1);
-	memcpy(buf, begin, len);
-	buf[len] = '\0';
-	return buf;
+	char* buffer = (char*)safeAlloc(len + 1);
+	memcpy(buffer, begin, len);
+	buffer[len] = '\0';
+	return buffer;
 }
 
 const char* consumeLineComment(const char* pch)
@@ -44,7 +44,29 @@ const char* consumeLineComment(const char* pch)
 
 const char* handleString(const char* pch)
 {
+	int capacity = 64, length = 0;
+	char* buffer = (char*)safeAlloc(capacity);
 
+	while (*pch != '"')
+	{
+		char charVal;
+		charVal = *pch++;
+
+		if (length + 1 >= capacity)
+		{
+			capacity *= 2;
+			buffer = realloc(buffer, capacity);
+		}
+
+		buffer[length ++] = charVal;
+	}
+
+	buffer[length] = '\0';                    
+	pch++;
+
+	Token* tk = addTk(STRING);
+	tk->text = buffer;
+	return pch;
 }
 
 const char* handleChar(const char* pch)
