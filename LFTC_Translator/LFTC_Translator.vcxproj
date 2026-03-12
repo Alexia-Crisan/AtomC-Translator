@@ -124,7 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\lexer.c" />
-    <ClCompile Include="..\tests\testlex.c" />
+    <ClCompile Include="..\main.c" />
     <ClCompile Include="..\utils.c" />
   </ItemGroup>
   <ItemGroup>

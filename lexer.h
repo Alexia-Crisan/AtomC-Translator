@@ -31,7 +31,7 @@ typedef struct Token
 
 Token *tokenize(const char *pch);
 void showTokens(const Token *tokens);
-void showTokensDetailed(const Token* tokens);
+void showTokensDetailed(const Token* tokens, FILE* out);
 const char* consumeLineComment(const char* pch);
 const char* handleString(const char* pch);
 const char* handleChar(const char* pch);

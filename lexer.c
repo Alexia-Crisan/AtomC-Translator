@@ -148,51 +148,51 @@ void showTokens(const Token *tokens)
 	}
 }
 
-void showTokensDetailed(const Token* tokens)
+void showTokensDetailed(const Token* tokens, FILE* out)
 {
 	for (const Token* tk = tokens; tk; tk = tk->next)
 	{
 		switch (tk->code)
 		{
-			case ID:        printf("%d\tID:%s\n", tk->line, tk->text); break;
-			case INT:       printf("%d\tINT:%d\n", tk->line, tk->i); break;
-			case DOUBLE:    printf("%d\tDOUBLE:%g\n", tk->line, tk->d); break;
+			case ID:        fprintf(out, "%d\tID:%s\n", tk->line, tk->text); break;
+			case INT:       fprintf(out, "%d\tINT:%d\n", tk->line, tk->i);    break;
+			case DOUBLE:    fprintf(out, "%d\tDOUBLE:%g\n", tk->line, tk->d);    break;
 			case CHAR:
-				if (tk->c == '\'') printf("%d\tCHAR:'\n", tk->line);
-				else               printf("%d\tCHAR:%c\n", tk->line, tk->c);
+				if (tk->c == '\'') fprintf(out, "%d\tCHAR:'\n", tk->line);
+				else              fprintf(out, "%d\tCHAR:%c\n", tk->line, tk->c);
 				break;
-			case STRING:      printf("%d\tSTRING:%s\n", tk->line, tk->text); break;
-			case TYPE_INT:    printf("%d\tTYPE_INT\n", tk->line); break;
-			case TYPE_CHAR:   printf("%d\tTYPE_CHAR\n", tk->line); break;
-			case TYPE_DOUBLE: printf("%d\tTYPE_DOUBLE\n", tk->line); break;
-			case IF:          printf("%d\tIF\n", tk->line); break;
-			case ELSE:        printf("%d\tELSE\n", tk->line); break;
-			case WHILE:       printf("%d\tWHILE\n", tk->line); break;
-			case RETURN:      printf("%d\tRETURN\n", tk->line); break;
-			case VOID:        printf("%d\tVOID\n", tk->line); break;
-			case STRUCT:      printf("%d\tSTRUCT\n", tk->line); break;
-			case COMMA:       printf("%d\tCOMMA\n", tk->line); break;
-			case SEMICOLON:   printf("%d\tSEMICOLON\n", tk->line); break;
-			case LPAR:        printf("%d\tLPAR\n", tk->line); break;
-			case RPAR:        printf("%d\tRPAR\n", tk->line); break;
-			case LACC:        printf("%d\tLACC\n", tk->line); break;
-			case RACC:        printf("%d\tRACC\n", tk->line); break;
-			case ASSIGN:      printf("%d\tASSIGN\n", tk->line); break;
-			case EQUAL:       printf("%d\tEQUAL\n", tk->line); break;
-			case ADD:         printf("%d\tADD\n", tk->line); break;
-			case SUB:         printf("%d\tSUB\n", tk->line); break;
-			case MUL:         printf("%d\tMUL\n", tk->line); break;
-			case DIV:         printf("%d\tDIV\n", tk->line); break;
-			case LESS:        printf("%d\tLESS\n", tk->line); break;
-			case LESSEQ:      printf("%d\tLESSEQ\n", tk->line); break;
-			case GREATER:     printf("%d\tGREATER\n", tk->line); break;
-			case GREATEREQ:   printf("%d\tGREATEREQ\n", tk->line); break;
-			case NOTEQ:       printf("%d\tNOTEQ\n", tk->line); break;
-			case NOT:         printf("%d\tNOT\n", tk->line); break;
-			case AND:         printf("%d\tAND\n", tk->line); break;
-			case OR:          printf("%d\tOR\n", tk->line); break;
-			case END:         printf("%d\tEND\n", tk->line); break;
-			default:          printf("%d\t??(%d)\n", tk->line, tk->code); break;
+			case STRING:      fprintf(out, "%d\tSTRING:%s\n", tk->line, tk->text); break;
+			case TYPE_INT:    fprintf(out, "%d\tTYPE_INT\n", tk->line); break;
+			case TYPE_CHAR:   fprintf(out, "%d\tTYPE_CHAR\n", tk->line); break;
+			case TYPE_DOUBLE: fprintf(out, "%d\tTYPE_DOUBLE\n", tk->line); break;
+			case IF:          fprintf(out, "%d\tIF\n", tk->line); break;
+			case ELSE:        fprintf(out, "%d\tELSE\n", tk->line); break;
+			case WHILE:       fprintf(out, "%d\tWHILE\n", tk->line); break;
+			case RETURN:      fprintf(out, "%d\tRETURN\n", tk->line); break;
+			case VOID:        fprintf(out, "%d\tVOID\n", tk->line); break;
+			case STRUCT:      fprintf(out, "%d\tSTRUCT\n", tk->line); break;
+			case COMMA:       fprintf(out, "%d\tCOMMA\n", tk->line); break;
+			case SEMICOLON:   fprintf(out, "%d\tSEMICOLON\n", tk->line); break;
+			case LPAR:        fprintf(out, "%d\tLPAR\n", tk->line); break;
+			case RPAR:        fprintf(out, "%d\tRPAR\n", tk->line); break;
+			case LACC:        fprintf(out, "%d\tLACC\n", tk->line); break;
+			case RACC:        fprintf(out, "%d\tRACC\n", tk->line); break;
+			case ASSIGN:      fprintf(out, "%d\tASSIGN\n", tk->line); break;
+			case EQUAL:       fprintf(out, "%d\tEQUAL\n", tk->line); break;
+			case ADD:         fprintf(out, "%d\tADD\n", tk->line); break;
+			case SUB:         fprintf(out, "%d\tSUB\n", tk->line); break;
+			case MUL:         fprintf(out, "%d\tMUL\n", tk->line); break;
+			case DIV:         fprintf(out, "%d\tDIV\n", tk->line); break;
+			case LESS:        fprintf(out, "%d\tLESS\n", tk->line); break;
+			case LESSEQ:      fprintf(out, "%d\tLESSEQ\n", tk->line); break;
+			case GREATER:     fprintf(out, "%d\tGREATER\n", tk->line); break;
+			case GREATEREQ:   fprintf(out, "%d\tGREATEREQ\n", tk->line); break;
+			case NOTEQ:       fprintf(out, "%d\tNOTEQ\n", tk->line); break;
+			case NOT:         fprintf(out, "%d\tNOT\n", tk->line); break;
+			case AND:         fprintf(out, "%d\tAND\n", tk->line); break;
+			case OR:          fprintf(out, "%d\tOR\n", tk->line); break;
+			case END:         fprintf(out, "%d\tEND\n", tk->line); break;
+			default:          fprintf(out, "%d\t??(%d)\n", tk->line, tk->code); break;
 		}
 	}
 }
