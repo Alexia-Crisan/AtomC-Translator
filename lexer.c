@@ -19,14 +19,8 @@ Token *addTk(int code)
 	tk->line = line;
 	tk->next = NULL;
 
-	if(lastTk)
-	{
-		lastTk->next = tk;
-	}
-	else
-	{
-		tokens = tk;
-	}
+	if(lastTk) lastTk->next = tk;
+	else tokens = tk;
 
 	lastTk = tk;
 	return tk;

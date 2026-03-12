@@ -8,8 +8,8 @@ void err(const char *fmt,...)
 {
 	fprintf(stderr,"error: ");
 	va_list va;
-	va_start(va,fmt);
-	vfprintf(stderr,fmt,va);
+	va_start(va, fmt);
+	vfprintf(stderr, fmt, va);
 	va_end(va);
 	fprintf(stderr,"\n");
 	exit(EXIT_FAILURE);
