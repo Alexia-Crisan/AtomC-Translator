@@ -37,5 +37,8 @@
     <Text Include="..\tests\lista-de-atomi.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="..\tokens.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
