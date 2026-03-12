@@ -5,14 +5,8 @@
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2)
-	{
-		fprintf(stderr, "Usage: %s <source_file>\n", argv[0]);
-		return 1;
-	}
-
-	char* src = loadFile(argv[1]);
-
+	FILE* src = fopen("../../tests/testlex.c", "r");
+	
 	Token* tks = tokenize(src);
 
 	FILE* out = fopen("tokens.txt", "w");
