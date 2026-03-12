@@ -49,8 +49,21 @@ const char* handleString(const char* pch)
 
 const char* handleChar(const char* pch)
 {
-	char c;
+	char charVal;
+	if (*pch != '\'' && *pch != '\0')
+		charVal = *pch++;
+	else 
+	{
+		err("Empty char constant");
+		charVal = 0;
+	}
 
+	if (*pch != '\'') err("Missing closing '");
+
+	pch++;                    
+	Token* tk = addTk(CHAR);
+	tk->c = charVal;
+	return pch;
 }
 
 Token *tokenize(const char *pch)
