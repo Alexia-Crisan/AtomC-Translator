@@ -41,6 +41,12 @@ char *extract(const char *begin, const char *end)
 	return buf;
 }
 
+const char* consumeLineComment(const char* pch)
+{
+	while (*pch && *pch != '\n') pch++;
+	return pch;
+}
+
 Token *tokenize(const char *pch)
 {
 	const char *start;
@@ -52,7 +58,7 @@ Token *tokenize(const char *pch)
 		{
 			case ' ': case '\t': pch++; break;
 			case '\r':		// handles different kinds of newlines (Windows: \r\n, Linux: \n, MacOS, OS X: \r or \n)
-				if(pch[1]=='\n')pch++;
+				if(pch[1] == '\n') pch++;
 				// fallthrough to \n
 			case '\n': { line++; pch++; break; }	
 			case '\0': addTk(END); return tokens;
@@ -69,6 +75,11 @@ Token *tokenize(const char *pch)
 			case '+': addTk(ADD); pch++; break;
 			case '-': addTk(SUB); pch++; break;
 			case '*': addTk(MUL); pch++; break;
+
+			case '/':
+				if (pch[1] == '/') pch = consumeLineComment(pch);
+				else { addTk(DIV); pch++; }
+				break;
 
 			case '=':
 				if (pch[1] == '=') { addTk(EQUAL); pch += 2; }
