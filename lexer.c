@@ -41,6 +41,17 @@ const char* consumeLineComment(const char* pch)
 	return pch;
 }
 
+
+static const char* handleString(const char* pch)
+{
+
+}
+
+static const char* handleChar(const char* pch)
+{
+
+}
+
 Token *tokenize(const char *pch)
 {
 	const char *start;
@@ -105,6 +116,10 @@ Token *tokenize(const char *pch)
 				if (pch[1] == '|') { addTk(OR); pch += 2; }
 				else err("Invalid char: %c (%d)", *pch, *pch);
 				break;
+
+			// handle char or string
+			case '\'': pch = handleChar(pch + 1); break;
+			case '"':  pch = handleString(pch + 1);    break;
 
 			default:
 				if(isalpha(*pch) || *pch == '_')
