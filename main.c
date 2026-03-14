@@ -1,19 +1,21 @@
 #include <stdio.h>
-#include <string.h>
 #include "lexer.h"
 #include "utils.h"
 
-int main(int argc, char* argv[])
+#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\LFTC\\LFTC_Translator\\tests\\testlex.c"
+#define OUTPUT_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\LFTC\\LFTC_Translator\\tokens.txt"
+
+int main()
 {
-	char* src = loadFile("../../tests/testlex.c");
-	Token* tks = tokenize(src);
+    char* src = loadFile(SOURCE_FILE);
+    Token* tks = tokenize(src);
 
-	FILE* out = fopen("tokens.txt", "w");
-	if (!out) err("Cannot open tokens.txt");
+    FILE* out = fopen(OUTPUT_FILE, "w");
+    if (!out) err("Cannot open output file");
 
-	showTokensDetailed(tks, out);
+    showTokensDetailed(tks, out);
+    fclose(out);
 
-	fclose(out);
-	printf("Tokens written to: tokens.txt\n");
-	return 0;
+    printf("Tokens written to: tokens.txt\n");
+    return 0;
 }
