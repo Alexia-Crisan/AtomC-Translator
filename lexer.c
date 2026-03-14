@@ -70,20 +70,33 @@ const char* handleString(const char* pch)
 
 	while (*pch != '"')
 	{
+		// reached the end of the entire file and never found a closing quote "
+		if (*pch == '\0') err("Unterminated string constant");
+
 		char charVal;
-		charVal = *pch++;
+		if (*pch == '\\')
+		{
+			pch++;
+			charVal = consumeEscape(&pch);
+		}
+		else
+		{
+			charVal = *pch++;
+		}
 
 		if (length + 1 >= capacity)
 		{
 			capacity *= 2;
 			buffer = realloc(buffer, capacity);
+
+			if (!buffer) err("Out of memory");
 		}
 
 		buffer[length ++] = charVal;
 	}
 
 	buffer[length] = '\0';                    
-	pch++;
+	pch++; // skip closing "
 
 	Token* tk = addTk(STRING);
 	tk->text = buffer;
@@ -93,8 +106,16 @@ const char* handleString(const char* pch)
 const char* handleChar(const char* pch)
 {
 	char charVal;
-	if (*pch != '\'' && *pch != '\0')
+
+	if (*pch == '\\')
+	{
+		*pch++;
+		charVal = charVal(&pch);
+	}
+	else if (*pch != '\'' && *pch != '\0')
+	{
 		charVal = *pch++;
+	}
 	else 
 	{
 		err("Empty char constant");
