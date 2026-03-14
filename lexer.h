@@ -39,3 +39,4 @@ char consumeEscape(const char** pch);
 const char* handleString(const char* pch);
 const char* handleChar(const char* pch);
 const char* handleNumber(const char* pch);
+const char* handleKeyword(const char* pch);

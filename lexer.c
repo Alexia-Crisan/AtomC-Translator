@@ -186,6 +186,28 @@ const char* handleNumber(const char* pch)
 	return pch;
 }
 
+const char* handleKeyword(const char* pch)
+{ 
+	const char* start = pch;
+	while (isalnum(*pch) || *pch == '_') pch++; // ID: [a-zA-Z_] [a-zA-Z0-9_]*
+
+	char* text = extract(start, pch);
+	Token* tk;
+
+	if (!strcmp(text, "char")) { free(text); addTk(TYPE_CHAR); }
+	else if (!strcmp(text, "double")) { free(text); addTk(TYPE_DOUBLE); }
+	else if (!strcmp(text, "else")) { free(text); addTk(ELSE); }
+	else if (!strcmp(text, "if")) { free(text); addTk(IF); }
+	else if (!strcmp(text, "int")) { free(text); addTk(TYPE_INT); }
+	else if (!strcmp(text, "return")) { free(text); addTk(RETURN); }
+	else if (!strcmp(text, "struct")) { free(text); addTk(STRUCT); }
+	else if (!strcmp(text, "void")) { free(text); addTk(VOID); }
+	else if (!strcmp(text, "while")) { free(text); addTk(WHILE); }
+	else { tk = addTk(ID); tk->text = text; }
+
+	return pch;
+}
+
 Token *tokenize(const char *pch)
 {
 	const char *start;
