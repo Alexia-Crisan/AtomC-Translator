@@ -281,20 +281,15 @@ Token *tokenize(const char *pch)
 			case '\'': pch = handleChar(pch + 1); break;
 			case '"':  pch = handleString(pch + 1);    break;
 				
-			// handle identifiers, keywords, numbers
+			// handle keywords, numbers
 			default:
 				if(isalpha(*pch) || *pch == '_')
-				{
-					for(start = pch++; isalnum(*pch) || *pch == '_'; pch++){}
-					char *text=extract(start,pch);
-					if(strcmp(text,"char") == 0) addTk(TYPE_CHAR);
-					else
-					{
-						tk = addTk(ID);
-						tk->text=text;
-					}
-				}
-				else err("invalid char: %c (%d)",*pch,*pch);
+					pch = handleKeyword(pch);
+				else if (isdigit(*pch))
+					pch = handleNumber(pch);
+				else
+					err("Invalid char: %c (%d)", *pch, *pch);
+				break;
 			}
 		}
 	}
