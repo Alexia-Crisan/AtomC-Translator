@@ -38,3 +38,4 @@ const char* consumeLineComment(const char* pch);
 char consumeEscape(const char** pch);
 const char* handleString(const char* pch);
 const char* handleChar(const char* pch);
+const char* handleNumber(const char* pch);

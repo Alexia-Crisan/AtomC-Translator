@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -110,7 +111,7 @@ const char* handleChar(const char* pch)
 	if (*pch == '\\')
 	{
 		*pch++;
-		charVal = charVal(&pch);
+		charVal = consumeEscape(&pch);
 	}
 	else if (*pch != '\'' && *pch != '\0')
 	{
@@ -127,6 +128,61 @@ const char* handleChar(const char* pch)
 	pch++;                    
 	Token* tk = addTk(CHAR);
 	tk->c = charVal;
+	return pch;
+}
+
+// DOUBLE: [0-9]+ ( '.' [0-9]+ ( [eE] [+-]? [0-9]+ )? | ( '.' [0-9]+ )? [eE] [+-]? [0-9]+ )
+// INT:    [0-9]+
+const char* handleNumber(const char* pch)
+{
+	const char* start = pch;
+
+	while (isdigit(*pch)) pch++; // [0-9]+
+
+	int isReal = 0;
+
+	// [0-9]+ '.' [0-9]+ ( [eE] [+-]? [0-9]+ )?
+	if (*pch == '.')
+	{
+		isReal = 1;
+
+		pch++;
+		if (!isdigit(*pch)) err("Expected digit after decimal point");
+		while (isdigit(*pch)) pch++;
+
+		if (*pch == 'e' || *pch == 'E') // optional exponent
+		{
+			pch++;
+			if (*pch == '+' || *pch == '-') pch++;
+			if (!isdigit(*pch)) err("Expected digit in exponent");
+			while (isdigit(*pch)) pch++;
+		}
+	}
+	// [0-9]+ [eE] [+-]? [0-9]+
+	else if (*pch == 'e' || *pch == 'E')
+	{
+		isReal = 1;
+		pch++;
+		if (*pch == '+' || *pch == '-') pch++;
+		if (!isdigit(*pch)) err("Expected digit in exponent");
+		while (isdigit(*pch)) pch++;
+	}
+
+	char* numString = extract(start, pch);
+
+	Token* tk;
+	if (isReal) 
+	{ 
+		tk = addTk(DOUBLE); 
+		tk->d = atof(numString);
+	}
+	else 
+	{ 
+		tk = addTk(INT);    
+		tk->i = atoi(numString);
+	}
+
+	free(numString);
 	return pch;
 }
 
