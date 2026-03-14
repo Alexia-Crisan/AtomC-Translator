@@ -2,17 +2,19 @@
 
 enum
 {
-	ID
+	ID,
 	// keywords
-	, TYPE_CHAR, TYPE_DOUBLE, TYPE_INT
-	, IF, ELSE, WHILE, RETURN, VOID, STRUCT
+	TYPE_CHAR, TYPE_DOUBLE, TYPE_INT,
+	IF, ELSE, WHILE, RETURN, VOID, STRUCT,
 	// delimiters
-	, COMMA, SEMICOLON, LPAR, RPAR, LACC, RACC, END
+	COMMA, SEMICOLON, LPAR, RPAR, LBRACKET, RBRACKET, LACC, RACC, END,
 	// operators
-	, ASSIGN, EQUAL, ADD, SUB, MUL, DIV, LESS, LESSEQ
-	, GREATER, GREATEREQ, NOTEQ, NOT, AND, OR
+	ADD, SUB, MUL, DIV, DOT,
+	AND, OR, NOT,
+	ASSIGN, EQUAL, NOTEQ,
+	LESS, LESSEQ, GREATER, GREATEREQ,
 	// constants
-	, INT, DOUBLE, CHAR, STRING
+	INT, DOUBLE, CHAR, STRING
 };
 
 typedef struct Token
@@ -21,17 +23,18 @@ typedef struct Token
 	int line;		// the line from the input file
 	union
 	{
-		char *text;		// the chars for ID, STRING (dynamically allocated)
-		int i;		// the value for INT
-		char c;		// the value for CHAR
+		char* text;		// the chars for ID, STRING
+		int i;			// the value for INT
+		char c;			// the value for CHAR
 		double d;		// the value for DOUBLE
 	};
-	struct Token *next;		// next token in a simple linked list
-}Token;
+	struct Token* next;
+} Token;
 
 Token *tokenize(const char *pch);
 void showTokens(const Token *tokens);
 void showTokensDetailed(const Token* tokens, FILE* out);
 const char* consumeLineComment(const char* pch);
+char consumeEscape(const char** pch);
 const char* handleString(const char* pch);
 const char* handleChar(const char* pch);

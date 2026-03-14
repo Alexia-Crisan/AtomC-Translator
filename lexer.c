@@ -7,7 +7,6 @@
 
 Token *tokens;	// single linked list of tokens
 Token *lastTk;  // the last token in list
-
 int line = 1;   // the current line in the input file
 
 // adds a token to the end of the tokens list and returns it
@@ -37,10 +36,32 @@ char *extract(const char *begin, const char *end)
 
 const char* consumeLineComment(const char* pch)
 {
-	while (*pch && *pch != '\n') pch++;
+	while (*pch && *pch != '\n' && *pch != '\r') pch++;
 	return pch;
 }
 
+char consumeEscape(const char** pch)
+{
+	char c = **pch;
+	(*pch)++;
+
+	switch (c)
+	{
+		case 'a':  return '\a';
+		case 'b':  return '\b';
+		case 'f':  return '\f';
+		case 'n':  return '\n';
+		case 'r':  return '\r';
+		case 't':  return '\t';
+		case 'v':  return '\v';
+		case '\\': return '\\';
+		case '\'': return '\'';
+		case '"':  return '"';
+		case '0':  return '\0';
+		default: err("Unknown escape sequence: \\%c", c);
+	}
+	return 0;
+}
 
 const char* handleString(const char* pch)
 {
@@ -97,6 +118,7 @@ Token *tokenize(const char *pch)
 	{
 		switch(*pch)
 		{
+			// SPACE: [ \n\r\t]
 			case ' ': case '\t': pch++; break;
 			case '\r':		// handles different kinds of newlines (Windows: \r\n, Linux: \n, MacOS, OS X: \r or \n)
 				if(pch[1] == '\n') pch++;
@@ -109,6 +131,8 @@ Token *tokenize(const char *pch)
 			case ';': addTk(SEMICOLON); pch++; break;
 			case '(': addTk(LPAR);      pch++; break;
 			case ')': addTk(RPAR);      pch++; break;
+			case '[': addTk(LBRACKET);  pch++; break;
+			case ']': addTk(RBRACKET);  pch++; break;
 			case '{': addTk(LACC);      pch++; break;
 			case '}': addTk(RACC);      pch++; break;
 
@@ -116,6 +140,7 @@ Token *tokenize(const char *pch)
 			case '+': addTk(ADD); pch++; break;
 			case '-': addTk(SUB); pch++; break;
 			case '*': addTk(MUL); pch++; break;
+			case '.': addTk(DOT); pch++; break;
 
 			case '/':
 				if (pch[1] == '/') pch = consumeLineComment(pch);
@@ -210,6 +235,8 @@ void showTokensDetailed(const Token* tokens, FILE* out)
 			case SEMICOLON:   fprintf(out, "%d\tSEMICOLON\n", tk->line); break;
 			case LPAR:        fprintf(out, "%d\tLPAR\n", tk->line); break;
 			case RPAR:        fprintf(out, "%d\tRPAR\n", tk->line); break;
+			case LBRACKET:    fprintf(out, "%d\tLBRACKET\n", tk->line); break;
+			case RBRACKET:    fprintf(out, "%d\tRBRACKET\n", tk->line); break;
 			case LACC:        fprintf(out, "%d\tLACC\n", tk->line); break;
 			case RACC:        fprintf(out, "%d\tRACC\n", tk->line); break;
 			case ASSIGN:      fprintf(out, "%d\tASSIGN\n", tk->line); break;
@@ -218,6 +245,7 @@ void showTokensDetailed(const Token* tokens, FILE* out)
 			case SUB:         fprintf(out, "%d\tSUB\n", tk->line); break;
 			case MUL:         fprintf(out, "%d\tMUL\n", tk->line); break;
 			case DIV:         fprintf(out, "%d\tDIV\n", tk->line); break;
+			case DOT:         fprintf(out, "%d\tDOT\n", tk->line); break;
 			case LESS:        fprintf(out, "%d\tLESS\n", tk->line); break;
 			case LESSEQ:      fprintf(out, "%d\tLESSEQ\n", tk->line); break;
 			case GREATER:     fprintf(out, "%d\tGREATER\n", tk->line); break;
