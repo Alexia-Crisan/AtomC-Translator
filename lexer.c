@@ -110,7 +110,7 @@ const char* handleChar(const char* pch)
 
 	if (*pch == '\\')
 	{
-		*pch++;
+		pch++;
 		charVal = consumeEscape(&pch);
 	}
 	else if (*pch != '\'' && *pch != '\0')

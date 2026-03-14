@@ -5,8 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-	FILE* src = fopen("../../tests/testlex.c", "r");
-	
+	char* src = loadFile("../../tests/testlex.c");
 	Token* tks = tokenize(src);
 
 	FILE* out = fopen("tokens.txt", "w");
