@@ -117,6 +117,7 @@ bool stmCompound()
 
 }
 
+// expr: exprAssign
 bool expr()
 {
 	Token* start = iTk;
@@ -128,19 +129,41 @@ bool expr()
 	return false;
 }
 
+// exprAssign: exprUnary ASSIGN exprAssign | exprOr
 bool exprAssign()
 {
 
 }
 
+// exprOr: exprOr OR exprAnd | exprAnd
 bool exprOr()
 {
+	Token* start = iTk;
 
+	if (exprAnd())
+	{
+		exprOrPrim();
+		return true;
+	}
+
+	iTk = start;
+	return false;
 }
 
 bool exprOrPrim()
 {
+	if (consume(OR))
+	{
+		if (exprAnd())
+		{
+			exprOrPrim();
+			return true;
+		}
 
+		tkerr("Expected expression after ||");
+	}
+
+	return true;
 }
 
 bool exprAnd()
