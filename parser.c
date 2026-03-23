@@ -30,29 +30,13 @@ bool consume(int code)
 	return false;
 }
 
-// typeBase: TYPE_INT | TYPE_DOUBLE | TYPE_CHAR | STRUCT ID
-bool typeBase() {
-	if (consume(TYPE_INT)) 
-	{
-		return true;
-	}
-	if (consume(TYPE_DOUBLE)) 
-	{
-		return true;
-	}
-	if (consume(TYPE_CHAR)) 
-	{
-		return true;
-	}
-	if (consume(STRUCT)) 
-	{
-		if (consume(ID)) 
-		{
-			return true;
-		}
-	}
-	return false;
+void parse(Token* tokens)
+{
+	iTk = tokens;
+	if (!unit())
+		tkerr("Syntax error");
 }
+
 
 // unit: ( structDef | fnDef | varDef )* END
 bool unit() 
@@ -71,8 +55,159 @@ bool unit()
 	return false;
 }
 
-void parse(Token* tokens) 
+
+bool structDef
 {
-	iTk = tokens;
-	if (!unit())tkerr("syntax error");
+
+}
+
+bool varDef
+{
+
+}
+
+
+// typeBase: TYPE_INT | TYPE_DOUBLE | TYPE_CHAR | STRUCT ID
+bool typeBase()
+{
+	if (consume(TYPE_INT))
+	{
+		return true;
+	}
+	if (consume(TYPE_DOUBLE))
+	{
+		return true;
+	}
+	if (consume(TYPE_CHAR))
+	{
+		return true;
+	}
+	if (consume(STRUCT))
+	{
+		if (consume(ID))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool arrayDecl()
+{
+
+}
+
+bool fnDef()
+{
+
+}
+
+bool fnParam()
+{
+
+}
+
+bool stm()
+{
+
+}
+
+bool stmCompound()
+{
+
+}
+
+bool expr()
+{
+
+}
+
+bool exprAssign()
+{
+
+}
+
+bool exprOr()
+{
+
+}
+
+bool exprOrPrim()
+{
+
+}
+
+bool exprAnd()
+{
+
+}
+
+bool exprAndPrim()
+{
+
+}
+
+bool exprEq()
+{
+
+}
+
+bool exprEqPrim()
+{
+
+}
+
+bool exprRel()
+{
+
+}
+
+bool exprRelPrim()
+{
+
+}
+
+bool exprAdd()
+{
+
+}
+
+bool exprAddPrim()
+{
+
+}
+
+bool exprMul();
+{
+
+}
+
+bool exprMulPrim()
+{
+
+}
+
+bool exprCast();
+{
+
+}
+
+bool exprUnary()
+{
+
+}
+
+bool exprPostfix()
+{
+
+}
+
+bool exprPostfixPrim()
+{
+
+}
+
+bool exprPrimary()
+{
+
 }
