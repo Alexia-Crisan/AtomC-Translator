@@ -119,7 +119,13 @@ bool stmCompound()
 
 bool expr()
 {
+	Token* start = iTk;
 
+	if (exprAssign()) 
+		return true;
+
+	iTk = start;
+	return false;
 }
 
 bool exprAssign()
