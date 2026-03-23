@@ -2,7 +2,7 @@
 
 ---
 
-## Part 1 — Lexical Analyzer
+## Part 1 - Lexical Analyzer
 
 ### What it does
 
@@ -35,13 +35,13 @@ Comments and whitespace are discarded at this stage and never appear in the toke
 | `STRING` | string literals with escape support: `"hello\n"`, `"say \""` |
 
 **Delimiters**
-`COMMA` `,` — `SEMICOLON` `;` — `LPAR` `(` — `RPAR` `)` — `LBRACKET` `[` — `RBRACKET` `]` — `LACC` `{` — `RACC` `}` — `END` `\0`
+`COMMA` `,` - `SEMICOLON` `;` - `LPAR` `(` - `RPAR` `)` - `LBRACKET` `[` - `RBRACKET` `]` - `LACC` `{` - `RACC` `}` - `END` `\0`
 
 **Operators**
-`ADD` `+` — `SUB` `-` — `MUL` `*` — `DIV` `/` — `DOT` `.`
-`AND` `&&` — `OR` `||` — `NOT` `!`
-`ASSIGN` `=` — `EQUAL` `==` — `NOTEQ` `!=`
-`LESS` `<` — `LESSEQ` `<=` — `GREATER` `>` — `GREATEREQ` `>=`
+`ADD` `+` - `SUB` `-` - `MUL` `*` - `DIV` `/` - `DOT` `.`
+`AND` `&&` - `OR` `||` - `NOT` `!`
+`ASSIGN` `=` - `EQUAL` `==` - `NOTEQ` `!=`
+`LESS` `<` - `LESSEQ` `<=` - `GREATER` `>` - `GREATEREQ` `>=`
 
 ---
 
@@ -64,7 +64,7 @@ Form 2: [0-9]+               [eE] [+-]? [0-9]+        →  49e-1  2E10
 | `consumeLineComment(pch)` | Skips all characters from `//` to end of line |
 | `handleChar(pch)` | Parses a character constant `'...'` including escape sequences |
 | `handleString(pch)` | Parses a string literal `"..."` with a growable buffer and escape handling |
-| `handleNumber(pch)` | Parses `INT` or `DOUBLE` — detects `.` and `e`/`E` exponent |
+| `handleNumber(pch)` | Parses `INT` or `DOUBLE` - detects `.` and `e`/`E` exponent |
 | `handleKeyword(pch)` | Reads a full word, checks against all keywords, emits keyword token or `ID` |
-| `tokenize(pch)` | Main loop — `switch` on first character routes to the right handler |
+| `tokenize(pch)` | Main loop - `switch` on first character routes to the right handler |
 | `showTokensDetailed(tokens, out)` | Writes the full token list to a `FILE*` in `line\tTYPE:value` format |
