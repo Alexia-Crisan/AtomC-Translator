@@ -61,9 +61,26 @@ bool structDef
 
 }
 
+// varDef: typeBase ID arrayDecl? SEMICOLON
 bool varDef
 {
+	Token* start = iTk;
 
+	if (typeBase())
+	{
+		if (consume(ID))
+		{
+			bool arrayDeclOptional = arrayDecl();
+
+			if (consume(SEMICOLON))
+				return true;
+
+			tkerr("Missing ; after variable definition");
+		}
+	}
+
+	iTk = start;
+	return false;
 }
 
 
