@@ -414,12 +414,33 @@ bool exprRelPrim()
 
 bool exprAdd()
 {
+	Token* start = iTk;
 
+	if (exprMul())
+	{
+		exprAddPrim();
+		return true;
+	}
+
+	iTk = start;
+	return false;
 }
 
+// exprAdd: exprAdd ( ADD | SUB ) exprMul | exprMul
 bool exprAddPrim()
 {
+	if (consume(ADD) || consume(SUB))
+	{
+		if (exprMul())
+		{
+			exprAddPrim();
+			return true;
+		}
 
+		tkerr("Expected expression after + or -");
+	}
+
+	return true;
 }
 
 bool exprMul();
