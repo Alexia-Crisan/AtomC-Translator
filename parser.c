@@ -153,9 +153,42 @@ bool arrayDecl()
 	return false;
 }
 
+// fnDef: ( typeBase | VOID ) ID LPAR(fnParam(COMMA fnParam)*) ? RPAR stmCompound
 bool fnDef()
 {
+	Token* start = iTk;
+	bool hasType = false;
 
+	if (typeBase() || consume(VOID))
+	{
+		if (consume(ID))
+		{
+			if (consume(LPAR))
+			{
+				if (fnParam())
+				{
+					while (consume(COMMA))
+					{
+						if (!fnParam())
+							tkerr("Expected parameter after ,");
+					}
+				}
+
+				if (consume(RPAR)
+				{
+					if (stmCompound())
+						return true;
+
+						tkerr("Missing function body");
+				}
+
+				tkerr("Missing ) in function definition");
+			}
+		}
+	}
+
+	iTk = start;
+	return false;
 }
 
 // fnParam: typeBase ID arrayDecl?
