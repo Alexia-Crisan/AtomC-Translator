@@ -457,7 +457,50 @@ bool exprPostfixPrim()
 
 }
 
+// exprPrimary: ID ( LPAR ( expr ( COMMA expr )* )? RPAR )? | INT | DOUBLE | CHAR | STRING | LPAR expr RPAR
 bool exprPrimary()
 {
+	Token* start = iTk;
 
+	if (consume(ID))
+	{
+		if (consume(LPAR))
+		{
+			if (expr())
+			{
+				while (consume(COMMA))
+				{
+					if (!expr()) 
+						tkerr("Expected expression after ,");
+				}
+			}
+
+			if (consume(RPAR))
+				return true;
+
+			tkerr("Missing ) in function call");
+		}
+
+		return true;
+	}
+
+	if (consume(INT))    return true;
+	if (consume(DOUBLE)) return true;
+	if (consume(CHAR))   return true;
+	if (consume(STRING)) return true;
+
+	if (consume(LPAR))
+	{
+		if (expr())
+		{
+			if (consume(RPAR)) 
+				return true;
+
+			tkerr("Missing ) after expression");
+		}
+		tkerr("Expected expression after (");
+	}
+
+	iTk = start;
+	return false;
 }
