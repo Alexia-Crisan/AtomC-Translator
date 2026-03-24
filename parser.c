@@ -221,7 +221,78 @@ bool fnParam()
 // stm: stmCompound | IF LPAR expr RPAR stm(ELSE stm) ? | WHILE LPAR expr RPAR stm | RETURN expr ? SEMICOLON | expr ? SEMICOLON
 bool stm()
 {
+	Token* start = iTk;
 
+	if (stmCompound()) return true;
+
+	if (consume(IF))
+	{
+		if (consume(LPAR))
+		{
+			if (expr())
+			{
+				if (consume(RPAR))
+				{
+					if (stm())
+					{
+						if (consume(ELSE))
+						{
+							if (!stm()) 
+								tkerr("Expected statement after else");
+						}
+						return true;
+					}
+
+					tkerr("Expected statement after if(...)");
+				}
+				
+				tkerr("Missing ) after if condition");
+			}
+
+			tkerr("Invalid or missing if condition");
+		}
+
+		tkerr("missing ( after if");
+	}
+
+	if (consume(WHILE))
+	{
+		if (consume(LPAR))
+		{
+			if (expr())
+			{
+				if (consume(RPAR))
+				{
+					if (stm()) 
+						return true;
+
+					tkerr("Expected statement after while(...)");
+				}
+
+				tkerr("Missing ) after while condition");
+			}
+
+			tkerr("Invalid or missing while condition");
+		}
+
+		tkerr("Missing ( after while");
+	}
+
+	if (consume(RETURN))
+	{
+		if (expr()) {}	// optional
+
+		if (consume(SEMICOLON))
+			return true;
+
+		tkerr("Missing ; after return");
+	}
+
+	if (expr()) {}	// option
+	if (consume(SEMICOLON)) return true;
+
+	iTk = start;
+	return false;
 }
 
 // stmCompound: LACC(varDef | stm)* RACC
