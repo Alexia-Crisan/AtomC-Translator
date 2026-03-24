@@ -432,9 +432,33 @@ bool exprMulPrim()
 
 }
 
+// exprCast: LPAR typeBase arrayDecl? RPAR exprCast | exprUnary
 bool exprCast();
 {
+	Token* start = iTk;
 
+	if (consume(LPAR))
+	{
+		if (typeBase())
+		{
+			if (arrayDecl()) {}  // optional
+			if (consume(RPAR))
+			{
+				if (exprCast()) 
+					return true;
+
+				tkerr("Expected expression after cast");
+			}
+		}
+		
+		iTk = start; // restore and try exprUnary
+	}
+
+	if (exprUnary()) 
+		return true;
+
+	iTk = start;
+	return false;
 }
 
 // exprUnary: (SUB | NOT) exprUnary | exprPostfix
