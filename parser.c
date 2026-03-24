@@ -351,7 +351,6 @@ bool exprAssign()
 	return false;
 }
 
-// exprOr: exprOr OR exprAnd | exprAnd
 bool exprOr()
 {
 	Token* start = iTk;
@@ -366,6 +365,7 @@ bool exprOr()
 	return false;
 }
 
+// exprOr: exprOr OR exprAnd | exprAnd
 bool exprOrPrim()
 {
 	if (consume(OR))
@@ -384,12 +384,34 @@ bool exprOrPrim()
 
 bool exprAnd()
 {
+	Token* start = iTk;
+
+	if (exprEq())
+	{
+		exprAndPrim();
+		return true;
+	}
+
+	iTk = start;
+	return false;
 
 }
 
+// exprAnd: exprAnd AND exprEq | exprEq
 bool exprAndPrim()
 {
+	if (consume(AND))
+	{
+		if (exprEq())
+		{
+			exprAndPrim();
+			return true;
+		}
 
+		tkerr("expected expression after &&");
+	}
+
+	return true;
 }
 
 bool exprEq()
