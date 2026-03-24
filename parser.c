@@ -162,12 +162,7 @@ bool fnDef()
 	Token* start = iTk;
 	bool hasType = false;
 
-	if (typeBase())       
-		hasType = true;
-	else if (consume(VOID)) 
-		hasType = true;
-
-	if (hasType)
+	if (typeBase() || consume(VOID))
 	{
 		if (consume(ID))
 		{
@@ -442,9 +437,23 @@ bool exprCast();
 
 }
 
+// exprUnary: (SUB | NOT) exprUnary | exprPostfix
 bool exprUnary()
 {
+	Token* start = iTk;
+	if (consume(SUB) || consume(NOT))
+	{
+		if (exprUnary()) 
+			return true;
 
+		tkerr("Expected expression after unary operator");
+	}
+
+	if (exprPostfix()) 
+		return true;
+
+	iTk = start;
+	return false
 }
 
 bool exprPostfix()
