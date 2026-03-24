@@ -210,14 +210,33 @@ bool fnParam()
 	return false;
 }
 
+// stm: stmCompound | IF LPAR expr RPAR stm(ELSE stm) ? | WHILE LPAR expr RPAR stm | RETURN expr ? SEMICOLON | expr ? SEMICOLON
 bool stm()
 {
 
 }
 
+// stmCompound: LACC(varDef | stm)* RACC
 bool stmCompound()
 {
+	Token* start = iTk;
 
+	if (consume(LACC))
+	{
+		for (;;)
+		{
+			if (varDef() || stm()) {}
+			else break;
+		}
+
+		if (consume(RACC))
+			return true;
+
+		tkerr("Missing } at end of block");
+	}
+
+	iTk = start;
+	return false;
 }
 
 // expr: exprAssign
