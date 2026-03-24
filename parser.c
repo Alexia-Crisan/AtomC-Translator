@@ -404,12 +404,33 @@ bool exprEqPrim()
 
 bool exprRel()
 {
+	Token* start = iTk;
 
+	if (exprAdd())
+	{
+		exprRelPrim();
+		return true;
+	}
+
+	iTk = start;
+	return false;
 }
 
+// exprRel: exprRel ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd | exprAdd
 bool exprRelPrim()
 {
+	if (consume(LESS) || consume(LESSEQ) || consume(GREATER) || consume(GREATEREQ))
+	{
+		if (exprAdd())
+		{
+			exprRelPrim();
+			return true;
+		}
 
+		tkerr("Expected expression after relational operator");
+	}
+
+	return true;
 }
 
 bool exprAdd()
