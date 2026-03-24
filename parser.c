@@ -55,10 +55,35 @@ bool unit()
 	return false;
 }
 
-
+// structDef: STRUCT ID LACC varDef* RACC SEMICOLON
 bool structDef
 {
+	Token* start = iTk;
 
+	if (consume(STRUCT))
+	{
+		if (consume(ID))
+		{
+			if (consume(LACC))
+			{
+				while (varDef()) {} // optional
+
+				if (consume(RACC))
+				{
+					if (consume(SEMICOLON))
+						return true;
+
+					tkerr("Missing ; after struct definition");
+
+				}
+
+				tkerr("Missing } in struct definition");
+			}
+		}
+	}
+
+	iTk = start;
+	return false;
 }
 
 // varDef: typeBase ID arrayDecl? SEMICOLON
