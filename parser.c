@@ -424,12 +424,33 @@ bool exprAddPrim()
 
 bool exprMul();
 {
+	Token* start = iTk;
 
+	if (exprCast())
+	{
+		exprMulPrim();
+		return true;
+	}
+
+	iTk = start;
+	return false;
 }
 
+// exprMul: exprMul ( MUL | DIV ) exprCast | exprCast
 bool exprMulPrim()
 {
+	if (consume(MUL) || consume(DIV))
+	{
+		if (exprCast())
+		{
+			exprMulPrim();
+			return true;
+		}
 
+		tkerr("Expected expression after * or /");
+	}
+
+	return true;
 }
 
 // exprCast: LPAR typeBase arrayDecl? RPAR exprCast | exprUnary
