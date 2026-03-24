@@ -48,10 +48,13 @@ bool unit()
 		else if (varDef()) {}
 		else break;
 	}
+
 	if (consume(END)) 
 	{
 		return true;
 	}
+
+	tkerr("Unexpected token");
 	return false;
 }
 
@@ -159,7 +162,12 @@ bool fnDef()
 	Token* start = iTk;
 	bool hasType = false;
 
-	if (typeBase() || consume(VOID))
+	if (typeBase())       
+		hasType = true;
+	else if (consume(VOID)) 
+		hasType = true;
+
+	if (hasType)
 	{
 		if (consume(ID))
 		{
@@ -225,7 +233,8 @@ bool stmCompound()
 	{
 		for (;;)
 		{
-			if (varDef() || stm()) {}
+			if (varDef()) {}
+			else if (stm()) {}
 			else break;
 		}
 
