@@ -394,12 +394,33 @@ bool exprAndPrim()
 
 bool exprEq()
 {
+	Token* start = iTk;
 
+	if (exprRel())
+	{
+		exprEqPrim();
+		return true;
+	}
+
+	iTk = start;
+	return false;
 }
 
+// exprEq: exprEq ( EQUAL | NOTEQ ) exprRel | exprRel
 bool exprEqPrim()
 {
+	if (consume(EQUAL) || consume(NOTEQ))
+	{
+		if (exprRel())
+		{
+			exprEqPrim();
+			return true;
+		}
 
+		tkerr("Expected expression after == or !=");
+	}
+
+	return true;
 }
 
 bool exprRel()
