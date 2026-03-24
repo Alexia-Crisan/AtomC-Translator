@@ -449,16 +449,7 @@ bool exprUnary()
 
 bool exprPostfix()
 {
-	Token* start = iTk;
 
-	if (exprPrimary())
-	{
-		exprPostfixPrim();
-		return true;
-	}
-
-	iTk = start;
-	return false;
 }
 
 // exprPostfix: exprPostfix LBRACKET expr RBRACKET | exprPostfix DOT ID | exprPrimary
@@ -471,6 +462,7 @@ bool exprPostfixPrim()
 			if (consume(RBRACKET))
 			{
 				exprPostfixPrim();
+
 				return true;
 			}
 
@@ -488,7 +480,7 @@ bool exprPostfixPrim()
 			return true;
 		}
 
-		tkerr("Expected field name after .");
+		tkerr("expected field name after .");
 	}
 	return true;
 }
