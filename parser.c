@@ -92,9 +92,23 @@ bool typeBase()
 	return false;
 }
 
+// arrayDecl: LBRACKET INT? RBRACKET
 bool arrayDecl()
 {
+	Token* start = iTk;
 
+	if (consume(LBRACKET))
+	{
+		consume(INT);
+
+		if (consume(RBRACKET))
+			return true;
+
+		tkerr("Missing ] in array declaration");
+	}
+
+	iTk = start;
+	return false;
 }
 
 bool fnDef()
