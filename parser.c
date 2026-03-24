@@ -59,7 +59,7 @@ bool unit()
 }
 
 // structDef: STRUCT ID LACC varDef* RACC SEMICOLON
-bool structDef
+bool structDef()
 {
 	Token* start = iTk;
 
@@ -90,7 +90,7 @@ bool structDef
 }
 
 // varDef: typeBase ID arrayDecl? SEMICOLON
-bool varDef
+bool varDef()
 {
 	Token* start = iTk;
 
@@ -160,7 +160,6 @@ bool arrayDecl()
 bool fnDef()
 {
 	Token* start = iTk;
-	bool hasType = false;
 
 	if (typeBase() || consume(VOID))
 	{
@@ -177,7 +176,7 @@ bool fnDef()
 					}
 				}
 
-				if (consume(RPAR)
+				if (consume(RPAR))
 				{
 					if (stmCompound())
 						return true;
@@ -507,7 +506,7 @@ bool exprAddPrim()
 	return true;
 }
 
-bool exprMul();
+bool exprMul()
 {
 	Token* start = iTk;
 
@@ -539,7 +538,7 @@ bool exprMulPrim()
 }
 
 // exprCast: LPAR typeBase arrayDecl? RPAR exprCast | exprUnary
-bool exprCast();
+bool exprCast()
 {
 	Token* start = iTk;
 
@@ -583,7 +582,7 @@ bool exprUnary()
 		return true;
 
 	iTk = start;
-	return false
+	return false;
 }
 
 bool exprPostfix()
