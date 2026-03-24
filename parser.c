@@ -158,9 +158,23 @@ bool fnDef()
 
 }
 
+// fnParam: typeBase ID arrayDecl?
 bool fnParam()
 {
+	Token* start = iTk;
 
+	if (typeBase())
+	{
+		if (consume(ID))
+		{
+			bool arrayDeclOptional = arrayDecl();
+
+			return true;
+		}
+	}
+
+	iTk = start;
+	return false;
 }
 
 bool stm()
