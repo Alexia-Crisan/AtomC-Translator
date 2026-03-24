@@ -254,7 +254,26 @@ bool expr()
 // exprAssign: exprUnary ASSIGN exprAssign | exprOr
 bool exprAssign()
 {
+	Token* start = iTk;
 
+	if (exprUnary())
+	{
+		if (consume(ASSIGN))
+		{
+			if (exprAssign())
+				return true;
+
+			tkerr("Expected expression after =");
+		}
+
+		iTk = start; // backtrack
+	}
+
+	if (exprOr()) 
+		return true;
+
+	iTk = start;
+	return false;
 }
 
 // exprOr: exprOr OR exprAnd | exprAnd
