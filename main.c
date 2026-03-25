@@ -3,8 +3,8 @@
 #include "parser.h"
 #include "utils.h"
 
-#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\LFTC\\LFTC_Translator\\tests\\testparser.c"
-#define OUTPUT_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\LFTC\\LFTC_Translator\\tokens.txt"
+#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testparser.c"
+#define OUTPUT_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tokens.txt"
 
 int main()
 {
