@@ -10,7 +10,7 @@ Token* consumedTk;	// the last consumed token
 
 void tkerr(const char* fmt, ...) 
 {
-	fprintf(stderr, "error in line %d: ", iTk->line);
+	fprintf(stderr, "Error in line %d: ", iTk->line);
 	va_list va;
 	va_start(va, fmt);
 	vfprintf(stderr, fmt, va);

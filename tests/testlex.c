@@ -9,7 +9,10 @@ int main()
 		i=i+1;
 		}
 	if(4.9==49e-1&&0.49E1==2.45*2.0)puts("yes");
+	char c = '	';
 	putc('\'');
-	puts("pentru \" se foloseste \\\"");	// pentru \n
+	puts("pentru  \r si pentru tab \t test");	// pentru \n
+
+	.25
 	return 0;
 }

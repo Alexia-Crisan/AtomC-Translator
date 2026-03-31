@@ -137,6 +137,7 @@ const char* handleNumber(const char* pch)
 {
 	const char* start = pch;
 
+	if (!isdigit(*pch)) err("Expected digit in number");
 	while (isdigit(*pch)) pch++; // [0-9]+
 
 	int isReal = 0;
@@ -269,12 +270,12 @@ Token *tokenize(const char *pch)
 
 			case '&':
 				if (pch[1] == '&') { addTk(AND); pch += 2; }
-				else err("Invalid char: %c (%d)", *pch, *pch);
+				else err("Missing second &", *pch, *pch);
 				break;
 
 			case '|':
 				if (pch[1] == '|') { addTk(OR); pch += 2; }
-				else err("Invalid char: %c (%d)", *pch, *pch);
+				else err("Missing second |", *pch, *pch);
 				break;
 
 			// handle char or string
@@ -310,7 +311,7 @@ void showTokensDetailed(const Token* tokens, FILE* out)
 		{
 			case ID:        fprintf(out, "%d\tID:%s\n", tk->line, tk->text); break;
 			case INT:       fprintf(out, "%d\tINT:%d\n", tk->line, tk->i);    break;
-			case DOUBLE:    fprintf(out, "%d\tDOUBLE:%g\n", tk->line, tk->d);    break;
+			case DOUBLE:    fprintf(out, "%d\tDOUBLE:%.2f\n", tk->line, tk->d);    break;
 			case CHAR:
 				if (tk->c == '\'') fprintf(out, "%d\tCHAR:'\n", tk->line);
 				else              fprintf(out, "%d\tCHAR:%c\n", tk->line, tk->c);
