@@ -278,8 +278,8 @@ Token *tokenize(const char *pch)
 				break;
 
 			// handle char or string
-			case '\'': pch = handleChar(pch + 1); break;
-			case '"':  pch = handleString(pch + 1);    break;
+			case '\'': pch = handleChar(pch + 1);   break;
+			case '"':  pch = handleString(pch + 1); break;
 				
 			// handle keywords, numbers
 			default:
