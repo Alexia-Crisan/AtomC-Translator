@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -181,7 +181,7 @@ bool fnDef()
 					if (stmCompound())
 						return true;
 
-						tkerr("Missing function body");
+					else tkerr("Missing function body");
 				}
 
 				tkerr("Missing ) in function definition");
@@ -350,6 +350,9 @@ bool exprAssign()
 	return false;
 }
 
+// exprOr: exprOr OR exprAnd | exprAnd
+// exprOr = exprAnd exprOrPrim
+// exprOrPrim = OR exprAnd exprOrPrim | ε
 bool exprOr()
 {
 	Token* start = iTk;
@@ -364,7 +367,6 @@ bool exprOr()
 	return false;
 }
 
-// exprOr: exprOr OR exprAnd | exprAnd
 bool exprOrPrim()
 {
 	if (consume(OR))
@@ -381,6 +383,9 @@ bool exprOrPrim()
 	return true;
 }
 
+// exprAnd: exprAnd AND exprEq | exprEq
+// exprAnd = exprEq exprAndPrim
+// exprAndPrim = AND exprEq exprAndPrim | ε
 bool exprAnd()
 {
 	Token* start = iTk;
@@ -396,7 +401,6 @@ bool exprAnd()
 
 }
 
-// exprAnd: exprAnd AND exprEq | exprEq
 bool exprAndPrim()
 {
 	if (consume(AND))
@@ -407,12 +411,15 @@ bool exprAndPrim()
 			return true;
 		}
 
-		tkerr("expected expression after &&");
+		tkerr("Expected expression after &&");
 	}
 
 	return true;
 }
 
+// exprEq: exprEq ( EQUAL | NOTEQ ) exprRel | exprRel
+// exprEq = exprRel exprEqPrim
+// exprEqPrim = (EQUAL | NOTEQ) exprRel exprEqPrim | ε
 bool exprEq()
 {
 	Token* start = iTk;
@@ -427,7 +434,6 @@ bool exprEq()
 	return false;
 }
 
-// exprEq: exprEq ( EQUAL | NOTEQ ) exprRel | exprRel
 bool exprEqPrim()
 {
 	if (consume(EQUAL) || consume(NOTEQ))
@@ -444,6 +450,9 @@ bool exprEqPrim()
 	return true;
 }
 
+// exprRel: exprRel ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd | exprAdd
+// exprRel = exprAdd exprRelPrim
+// exprRelPrim = (LESS | LESSEQ | GREATER | GREATEREQ) exprAdd exprRelPrim | ε
 bool exprRel()
 {
 	Token* start = iTk;
@@ -458,7 +467,6 @@ bool exprRel()
 	return false;
 }
 
-// exprRel: exprRel ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd | exprAdd
 bool exprRelPrim()
 {
 	if (consume(LESS) || consume(LESSEQ) || consume(GREATER) || consume(GREATEREQ))
@@ -475,6 +483,9 @@ bool exprRelPrim()
 	return true;
 }
 
+// exprAdd: exprAdd ( ADD | SUB ) exprMul | exprMul
+// exprAdd = exprMul exprAddPrim
+// exprAddPrim = ( ADD | SUB ) exprMul exprAddPrim | ε
 bool exprAdd()
 {
 	Token* start = iTk;
@@ -489,7 +500,6 @@ bool exprAdd()
 	return false;
 }
 
-// exprAdd: exprAdd ( ADD | SUB ) exprMul | exprMul
 bool exprAddPrim()
 {
 	if (consume(ADD) || consume(SUB))
@@ -506,6 +516,9 @@ bool exprAddPrim()
 	return true;
 }
 
+// exprMul: exprMul ( MUL | DIV ) exprCast | exprCast
+// exprMul = exprCast exprMulPrim
+// exprMulPrim = ( MUL | DIV ) exprCast exprMulPrim | ε
 bool exprMul()
 {
 	Token* start = iTk;
@@ -520,7 +533,6 @@ bool exprMul()
 	return false;
 }
 
-// exprMul: exprMul ( MUL | DIV ) exprCast | exprCast
 bool exprMulPrim()
 {
 	if (consume(MUL) || consume(DIV))
@@ -585,6 +597,9 @@ bool exprUnary()
 	return false;
 }
 
+// exprPostfix: exprPostfix LBRACKET expr RBRACKET | exprPostfix DOT ID | exprPrimary
+// exprPostfix = exprPrimary exprPostfixPrim
+// exprPostfixPrim = LBRACKET expr RBRACKET exprPostfixPrim | DOT ID exprPostfixPrim | ε
 bool exprPostfix()
 {
 	Token* start = iTk;
@@ -599,7 +614,6 @@ bool exprPostfix()
 	return false;
 }
 
-// exprPostfix: exprPostfix LBRACKET expr RBRACKET | exprPostfix DOT ID | exprPrimary
 bool exprPostfixPrim()
 {
 	if (consume(LBRACKET))
