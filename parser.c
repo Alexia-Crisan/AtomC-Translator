@@ -246,7 +246,7 @@ bool stm()
 			tkerr("Invalid or missing if condition");
 		}
 
-		tkerr("missing ( after if");
+		tkerr("Missing ( after if");
 	}
 
 	if (consume(WHILE))
@@ -476,7 +476,7 @@ bool exprRelPrim()
 			exprRelPrim();
 			return true;
 		}
-
+		//aici
 		tkerr("Expected expression after relational operator");
 	}
 

@@ -1,2 +1,2 @@
-cl main.c lexer.c parser.c utils.c
+cl main.c lexer.c parser.c utils.c ad.c
 .\main.exe
