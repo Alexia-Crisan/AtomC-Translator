@@ -54,7 +54,7 @@ bool unit()
 		return true;
 	}
 
-	tkerr("Unexpected token");
+	tkerr("Unexpected token at top level; expected a struct definition, function definition, or variable declaration");
 	return false;
 }
 
@@ -133,6 +133,8 @@ bool typeBase()
 		{
 			return true;
 		}
+		
+		tkerr("Expected struct name after keyword 'struct'");
 	}
 	return false;
 }
@@ -172,7 +174,7 @@ bool fnDef()
 					while (consume(COMMA))
 					{
 						if (!fnParam())
-							tkerr("Expected parameter after ,");
+							tkerr("Expected parameter after , in function parameter list");
 					}
 				}
 
@@ -436,15 +438,26 @@ bool exprEq()
 
 bool exprEqPrim()
 {
-	if (consume(EQUAL) || consume(NOTEQ))
+	if (consume(EQUAL))
 	{
-		if (exprRel())
+		if (!exprRel())
 		{
-			exprEqPrim();
-			return true;
+			tkerr("Expected expression after ==");
 		}
 
-		tkerr("Expected expression after == or !=");
+		exprEqPrim();
+		return true;
+	}
+
+	if (consume(NOTEQ))
+	{
+		if (!exprRel())
+		{
+			tkerr("Expected expression after !=");
+		}
+
+		exprEqPrim();
+		return true;
 	}
 
 	return true;
@@ -469,15 +482,48 @@ bool exprRel()
 
 bool exprRelPrim()
 {
-	if (consume(LESS) || consume(LESSEQ) || consume(GREATER) || consume(GREATEREQ))
+	if (consume(LESS))
 	{
 		if (exprAdd())
 		{
 			exprRelPrim();
 			return true;
 		}
-		//aici
-		tkerr("Expected expression after relational operator");
+
+		tkerr("Expected expression after relational operator <");
+	}
+
+	if (consume(LESSEQ))
+	{
+		if (exprAdd())
+		{
+			exprRelPrim();
+			return true;
+		}
+
+		tkerr("Expected expression after relational operator <=");
+	}
+
+	if (consume(GREATER))
+	{
+		if (exprAdd())
+		{
+			exprRelPrim();
+			return true;
+		}
+
+		tkerr("Expected expression after relational operator >");
+	}
+
+	if (consume(GREATEREQ))
+	{
+		if (exprAdd())
+		{
+			exprRelPrim();
+			return true;
+		}
+
+		tkerr("Expected expression after relational operator >=");
 	}
 
 	return true;
@@ -502,7 +548,7 @@ bool exprAdd()
 
 bool exprAddPrim()
 {
-	if (consume(ADD) || consume(SUB))
+	if (consume(ADD))
 	{
 		if (exprMul())
 		{
@@ -510,7 +556,18 @@ bool exprAddPrim()
 			return true;
 		}
 
-		tkerr("Expected expression after + or -");
+		tkerr("Expected expression after +");
+	}
+
+	if (consume(SUB))
+	{
+		if (exprMul())
+		{
+			exprAddPrim();
+			return true;
+		}
+
+		tkerr("Expected expression after -");
 	}
 
 	return true;
@@ -535,7 +592,7 @@ bool exprMul()
 
 bool exprMulPrim()
 {
-	if (consume(MUL) || consume(DIV))
+	if (consume(MUL))
 	{
 		if (exprCast())
 		{
@@ -543,7 +600,18 @@ bool exprMulPrim()
 			return true;
 		}
 
-		tkerr("Expected expression after * or /");
+		tkerr("Expected expression after *");
+	}
+
+	if (consume(DIV))
+	{
+		if (exprCast())
+		{
+			exprMulPrim();
+			return true;
+		}
+
+		tkerr("Expected expression after /");
 	}
 
 	return true;
