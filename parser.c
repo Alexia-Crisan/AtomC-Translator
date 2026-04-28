@@ -208,8 +208,6 @@ bool fnParam()
 
 			return true;
 		}
-
-		tkerr("Missing parameter name");
 	}
 
 	iTk = start;
@@ -382,14 +380,13 @@ bool exprOrPrim()
 {
 	if (consume(OR))
 	{
-		if (exprAnd())
-		{
-			exprOrPrim();
-			return true;
-		}
+		if (!exprAnd())
+			tkerr("Expected expression after ||");
 
-		tkerr("Expected expression after ||");
+		exprOrPrim();
+		return true;
 	}
+	return true;
 
 	return true;
 }
@@ -416,13 +413,11 @@ bool exprAndPrim()
 {
 	if (consume(AND))
 	{
-		if (exprEq())
-		{
-			exprAndPrim();
-			return true;
-		}
+		if (!exprEq())
+			tkerr("Expected expression after &&");
 
-		tkerr("Expected expression after &&");
+		exprAndPrim();
+		return true;
 	}
 
 	return true;
