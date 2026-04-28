@@ -208,6 +208,8 @@ bool fnParam()
 
 			return true;
 		}
+
+		tkerr("Missing parameter name");
 	}
 
 	iTk = start;
@@ -284,8 +286,15 @@ bool stm()
 		tkerr("Missing ; after return");
 	}
 
-	if (expr()) {}	// option
-	if (consume(SEMICOLON)) return true;
+	if (expr())
+	{
+		if (!consume(SEMICOLON))
+			tkerr("Missing ; after expression statement");
+
+		return true;
+	}
+
+	if (consume(SEMICOLON)) return true;  // empty statement: just ;
 
 	iTk = start;
 	return false;
@@ -484,49 +493,41 @@ bool exprRelPrim()
 {
 	if (consume(LESS))
 	{
-		if (exprAdd())
-		{
-			exprRelPrim();
-			return true;
-		}
+		if (!exprAdd())
+			tkerr("Missing or invalid operand after <");
 
-		tkerr("Expected expression after relational operator <");
+		exprRelPrim();
+		return true;
 	}
 
 	if (consume(LESSEQ))
 	{
-		if (exprAdd())
-		{
-			exprRelPrim();
-			return true;
-		}
+		if (!exprAdd())
+			tkerr("Missing or invalid operand after <=");
 
-		tkerr("Expected expression after relational operator <=");
+		exprRelPrim();
+		return true;
 	}
 
 	if (consume(GREATER))
 	{
-		if (exprAdd())
-		{
-			exprRelPrim();
-			return true;
-		}
+		if (!exprAdd())
+			tkerr("Missing or invalid operand after >");
 
-		tkerr("Expected expression after relational operator >");
+		exprRelPrim();
+		return true;
 	}
 
 	if (consume(GREATEREQ))
 	{
-		if (exprAdd())
-		{
-			exprRelPrim();
-			return true;
-		}
+		if (!exprAdd())
+			tkerr("Missing or invalid operand after >=");
 
-		tkerr("Expected expression after relational operator >=");
+		exprRelPrim();
+		return true;
 	}
 
-	return true;
+	return true; // epsilon
 }
 
 // exprAdd: exprAdd ( ADD | SUB ) exprMul | exprMul
@@ -550,24 +551,20 @@ bool exprAddPrim()
 {
 	if (consume(ADD))
 	{
-		if (exprMul())
-		{
-			exprAddPrim();
-			return true;
-		}
+		if (!exprMul())
+			tkerr("Missing or invalid operand after +");
 
-		tkerr("Expected expression after +");
+		exprAddPrim();
+		return true;
 	}
 
 	if (consume(SUB))
 	{
-		if (exprMul())
-		{
-			exprAddPrim();
-			return true;
-		}
+		if (!exprMul())
+			tkerr("Missing or invalid operand after -");
 
-		tkerr("Expected expression after -");
+		exprAddPrim();
+		return true;
 	}
 
 	return true;
@@ -594,24 +591,20 @@ bool exprMulPrim()
 {
 	if (consume(MUL))
 	{
-		if (exprCast())
-		{
-			exprMulPrim();
-			return true;
-		}
+		if (!exprCast())
+			tkerr("Missing or invalid operand after *");
 
-		tkerr("Expected expression after *");
+		exprMulPrim();
+		return true;
 	}
 
 	if (consume(DIV))
 	{
-		if (exprCast())
-		{
-			exprMulPrim();
-			return true;
-		}
+		if (!exprCast())
+			tkerr("Missing or invalid operand after /");
 
-		tkerr("Expected expression after /");
+		exprMulPrim();
+		return true;
 	}
 
 	return true;
@@ -650,12 +643,21 @@ bool exprCast()
 bool exprUnary()
 {
 	Token* start = iTk;
-	if (consume(SUB) || consume(NOT))
-	{
-		if (exprUnary()) 
-			return true;
 
-		tkerr("Expected expression after unary operator");
+	if (consume(SUB))
+	{
+		if (!exprUnary())
+			tkerr("Expected expression after unary -");
+
+		return true;
+	}
+
+	if (consume(NOT))
+	{
+		if (!exprUnary())
+			tkerr("Expected expression after unary !");
+
+		return true;
 	}
 
 	if (exprPostfix()) 
