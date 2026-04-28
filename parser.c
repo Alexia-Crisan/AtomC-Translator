@@ -609,7 +609,6 @@ bool exprCast()
 {
 	Token* start = iTk;
 
-	// FIX
 	if (consume(LPAR))
 	{
 		if (typeBase())
@@ -624,6 +623,7 @@ bool exprCast()
 
 			return true;
 		}
+
 		iTk = start; // LPAR seen but no typeBase - not a cast
 	}
 
