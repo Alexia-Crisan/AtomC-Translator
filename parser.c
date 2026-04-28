@@ -386,7 +386,6 @@ bool exprOrPrim()
 		exprOrPrim();
 		return true;
 	}
-	return true;
 
 	return true;
 }
@@ -610,25 +609,25 @@ bool exprCast()
 {
 	Token* start = iTk;
 
+	// FIX
 	if (consume(LPAR))
 	{
 		if (typeBase())
 		{
-			if (arrayDecl()) {}  // optional
-			if (consume(RPAR))
-			{
-				if (exprCast()) 
-					return true;
+			arrayDecl();
 
-				tkerr("Expected expression after cast");
-			}
+			if (!consume(RPAR))
+				tkerr("Missing ')' in cast expression");
+
+			if (!exprCast())
+				tkerr("Missing expression after cast");
+
+			return true;
 		}
-		
-		iTk = start; // restore and try exprUnary
+		iTk = start; // LPAR seen but no typeBase - not a cast
 	}
 
-	if (exprUnary()) 
-		return true;
+	if (exprUnary()) return true;
 
 	iTk = start;
 	return false;
