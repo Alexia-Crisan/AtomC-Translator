@@ -5,6 +5,7 @@
 
 #include "ad.h"
 #include "parser.h"
+#include "utils.h"
 
 Token* iTk;			// the iterator in the tokens list
 Token* consumedTk;	// the last consumed token
@@ -78,7 +79,7 @@ bool structDef()
 				// AD: struct name must be unique in current domain
 				Symbol* s = findSymbolInDomain(symTable, tkName->text);
 				if (s)
-					tkerr("symbol redefinition: %s", tkName->text);
+					tkerr("AD: Symbol redefinition: %s", tkName->text);
 
 				s = addSymbolToDomain(symTable, newSymbol(tkName->text, SK_STRUCT));
 				s->type.tb = TB_STRUCT;
@@ -183,16 +184,21 @@ bool varDef()
 // typeBase: TYPE_INT | TYPE_DOUBLE | TYPE_CHAR | STRUCT ID
 bool typeBase(Type* t)
 {
+	t->n = -1;   // AD: not an array
+
 	if (consume(TYPE_INT))
 	{
+		t->tb = TB_INT;
 		return true;
 	}
 	if (consume(TYPE_DOUBLE))
 	{
+		t->tb = TB_DOUBLE;
 		return true;
 	}
 	if (consume(TYPE_CHAR))
 	{
+		t->tb = TB_CHAR;
 		return true;
 	}
 	if (consume(STRUCT))
@@ -328,7 +334,7 @@ bool fnParam()
 			// AD: parameter name must be unique in current (function's) domain
 			Symbol* param = findSymbolInDomain(symTable, tkName->text);
 			if (param)
-				tkerr("symbol redefinition: %s", tkName->text);
+				tkerr("AD: Symbol redefinition: %s", tkName->text);
 
 			param = newSymbol(tkName->text, SK_PARAM);
 			param->type = t;
