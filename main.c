@@ -3,7 +3,7 @@
 #include "parser.h"
 #include "utils.h"
 
-#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testparser.c"
+#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testad.c"
 #define OUTPUT_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tokens.txt"
 
 int main()
@@ -21,8 +21,8 @@ int main()
     fclose(out);
     printf("Tokens written to tokens.txt\n");
 
-     parse(tks);
-     printf("Syntax OK\n");
+    parse(tks);
+    printf("Syntax OK\n");
 
     return 0;
 }

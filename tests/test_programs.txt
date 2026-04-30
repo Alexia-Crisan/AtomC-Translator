@@ -1,0 +1,184 @@
+// ────────────────────────────────────────────────────────────
+// TEST 1
+// Error: struct redefinition at global scope
+// Expected: "symbol redefinition: Point"
+// Trigger: findSymbolInDomain(symTable, tkName->text) != NULL in structDef
+// ────────────────────────────────────────────────────────────
+struct Point {
+    int x;
+    int y;
+};
+struct Point {
+    double lat;
+    double lon;
+};
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 2
+// Error: variable redefinition inside a struct
+// Expected: "symbol redefinition: x"
+// Trigger: findSymbolInDomain(symTable, tkName->text) != NULL in varDef
+//          while owner->kind == SK_STRUCT
+// ────────────────────────────────────────────────────────────
+struct BadStruct {
+    int x;
+    double x;
+};
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 3
+// Error: global variable redefinition
+// Expected: "symbol redefinition: count"
+// Trigger: findSymbolInDomain(symTable, tkName->text) != NULL in varDef
+//          at global scope (owner == NULL)
+// ────────────────────────────────────────────────────────────
+int count;
+int count;
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 4
+// Error: array variable declared without a dimension
+// Expected: "a vector variable must have a specified dimension"
+// Trigger: arrayDecl sets t.n==0 (no INT inside []) and varDef checks it
+// ────────────────────────────────────────────────────────────
+int data[];
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 5
+// Error: variable uses an undefined struct type
+// Expected: "undefined struct: Color"
+// Trigger: findSymbol(tkName->text) returns NULL in typeBase for STRUCT ID
+// ────────────────────────────────────────────────────────────
+struct Color c;
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 6
+// Error: function redefinition at global scope
+// Expected: "symbol redefinition: compute"
+// Trigger: findSymbolInDomain(symTable, tkName->text) != NULL in fnDef
+// ────────────────────────────────────────────────────────────
+void compute() {}
+int compute() {}
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 7
+// Error: function parameter redefinition
+// Expected: "symbol redefinition: val"
+// Trigger: findSymbolInDomain(symTable, tkName->text) != NULL in fnParam
+// ────────────────────────────────────────────────────────────
+void process(int val, double val) {}
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 8
+// Error: local variable redefinition inside a function
+// Expected: "symbol redefinition: n"
+// Trigger: findSymbolInDomain(symTable, tkName->text) != NULL in varDef
+//          while owner->kind == SK_FN
+// This matches the example in the lab brief:
+//   void f(int x, int n) { int n; ... }
+// ────────────────────────────────────────────────────────────
+void f(int x, int n) {
+    int n;
+}
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 9
+// Error: parameter name same as another parameter (redefinition)
+// Expected: "symbol redefinition: a"
+// Note: this is separate from TEST 7 to show parameter-vs-parameter clash
+//       (same domain, both added by fnParam)
+// ────────────────────────────────────────────────────────────
+int add(int a, int a) {
+    return a;
+}
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 10
+// Error: array variable inside a struct declared without a dimension
+// Expected: "a vector variable must have a specified dimension"
+// Trigger: same as TEST 4 but inside a struct body (owner->kind == SK_STRUCT)
+// ────────────────────────────────────────────────────────────
+struct Matrix {
+    int rows[];
+};
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 11
+// Error: using a struct type that is defined AFTER the variable
+// Expected: "undefined struct: Vec3"
+// Trigger: findSymbol in typeBase finds nothing because Vec3 is not yet in TS
+//          (AtomC requires forward declarations — structs must be defined before use)
+// ────────────────────────────────────────────────────────────
+struct UsesBefore {
+    struct Vec3 position;
+};
+struct Vec3 {
+    double x;
+    double y;
+    double z;
+};
+
+
+// ────────────────────────────────────────────────────────────
+// TEST 12 — VALID PROGRAM (no errors expected)
+// Shows that:
+//   - a parameter CAN shadow a global variable (different domains)
+//   - a local variable inside an if block is in its own domain
+//   - the same name CAN be reused in sibling domains
+// ────────────────────────────────────────────────────────────
+int x;
+int y;
+
+void g(int x, int n) {
+    if (x < y) {
+        int n;
+    }
+    if (x > 0) {
+        int n;
+    }
+}
+
+// ────────────────────────────────────────────────────────────
+//// testad-init
+
+int x;
+char y;
+double z;
+double p[100];
+
+struct S1{
+	int i;
+	double d[2];
+	char x;
+	};
+struct S1 p1;
+struct S1 vp[10];
+
+double sum(double x[5],int n){
+	double r;
+	int i;
+	r=0;
+	i=0;
+	while(i<n){
+		double n;
+		n=x[i];
+		r=r+n;
+		i=i+1;
+		}
+	return r;
+	}
+	
+void f(struct S1 p){
+	puti(p.i);
+	}
+
