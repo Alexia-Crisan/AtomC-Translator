@@ -1,7 +1,5 @@
 #pragma once
 
-// Forward declaration for the VM instruction type (defined in a later lab stage).
-// Needed here because struct Symbol's fn union contains an Instr* field.
 typedef struct Instr Instr;
 
 struct Symbol; typedef struct Symbol Symbol;
