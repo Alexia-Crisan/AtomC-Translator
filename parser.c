@@ -174,7 +174,7 @@ bool fnDef()
 					while (consume(COMMA))
 					{
 						if (!fnParam())
-							tkerr("Expected parameter after , in function parameter list");
+							tkerr("Missing or invalid parameter after , in function parameter list");
 					}
 				}
 
