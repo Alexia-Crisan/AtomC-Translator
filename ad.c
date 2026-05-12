@@ -36,7 +36,7 @@ int typeSize(Type *t)
 	if(t->n == 0)
 		return sizeof(void*);
 
-	return t->n*typeBaseSize(t);
+	return t->n * typeBaseSize(t);
 }
 
 // free from memory a list of symbols
