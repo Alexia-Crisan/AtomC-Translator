@@ -3,7 +3,7 @@
 #include "parser.h"
 #include "utils.h"
 
-#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testad.c"
+#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testat.c"
 #define OUTPUT_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tokens.txt"
 
 int main()

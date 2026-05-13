@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include "ad.h"
+#include "at.h"
 #include "lexer.h"
 
 void tkerr(const char* fmt, ...);
