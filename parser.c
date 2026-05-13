@@ -406,21 +406,18 @@ bool stm()
 				if (!canBeScalar(&rCond))
 					tkerr("AT: The while condition must be a scalar value");
 
-				if (expr())
-				{
-					if (consume(RPAR))
-					{
-						if (stm())
-							return true;
+				if (consume(RPAR))
+				{						
+					if (stm())
+						return true;
 
-						tkerr("Expected statement after while(...)");
-					}
-
-					tkerr("Missing ) after while condition");
+					tkerr("Expected statement after while(...)");
 				}
 
-				tkerr("Invalid or missing while condition");
+				tkerr("Missing ) after while condition");
 			}
+
+			tkerr("Invalid or missing while condition");
 		}
 
 		tkerr("Missing ( after while");
@@ -513,7 +510,7 @@ bool exprAssign(Ret* r)
 	Token* start = iTk;
 	Ret rDst;
 
-	if (exprUnary())
+	if (exprUnary(&rDst))
 	{
 		if (consume(ASSIGN))
 		{
@@ -649,7 +646,7 @@ bool exprEq(Ret* r)
 	return false;
 }
 
-bool exprEqPrim()
+bool exprEqPrim(Ret* r)
 {
 	if (consume(EQUAL))
 	{
@@ -691,7 +688,7 @@ bool exprEqPrim()
 // exprRel: exprRel ( LESS | LESSEQ | GREATER | GREATEREQ ) exprAdd | exprAdd
 // exprRel = exprAdd exprRelPrim
 // exprRelPrim = (LESS | LESSEQ | GREATER | GREATEREQ) exprAdd exprRelPrim | ε
-bool(Ret* r)
+bool exprRel(Ret* r)
 {
 	Token* start = iTk;
 
@@ -705,7 +702,7 @@ bool(Ret* r)
 	return false;
 }
 
-bool exprRelPrim()
+bool exprRelPrim(Ret* r)
 {
 	if (consume(LESS))
 	{
@@ -795,7 +792,7 @@ bool exprAdd(Ret* r)
 	return false;
 }
 
-bool exprAddPrim()
+bool exprAddPrim(Ret* r)
 {
 	if (consume(ADD))
 	{
@@ -851,7 +848,7 @@ bool exprMul(Ret* r)
 	return false;
 }
 
-bool exprMulPrim()
+bool exprMulPrim(Ret* r)
 {
 	if (consume(MUL))
 	{
@@ -993,7 +990,7 @@ bool exprPostfix(Ret* r)
 	return false;
 }
 
-bool exprPostfixPrim()
+bool exprPostfixPrim(Ret* r)
 {
 	if (consume(LBRACKET))
 	{
