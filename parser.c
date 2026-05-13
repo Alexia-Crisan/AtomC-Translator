@@ -448,7 +448,7 @@ bool stm()
 		tkerr("Missing ; after return");
 	}
 
-	if (expr())
+	if (expr(&rExpr))
 	{
 		if (!consume(SEMICOLON))
 			tkerr("Missing ; after expression statement");
@@ -542,7 +542,7 @@ bool exprAssign(Ret* r)
 		iTk = start; // backtrack
 	}
 
-	if (exprOr()) 
+	if (exprOr(r)) 
 		return true;
 
 	iTk = start;
@@ -859,7 +859,7 @@ bool exprMulPrim(Ret* r)
 		// AT: both operands must be scalar and non-struct
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
-			tkerr("invalid operand type for *");
+			tkerr("AT: Invalid operand type for *");
 
 		*r = (Ret){ tDst, false, true };
 
@@ -876,7 +876,7 @@ bool exprMulPrim(Ret* r)
 		// AT: both operands must be scalar and non-struct
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
-			tkerr("invalid operand type for /");
+			tkerr("AT: Invalid operand type for /");
 
 		*r = (Ret){ tDst, false, true };
 
