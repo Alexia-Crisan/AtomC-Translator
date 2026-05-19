@@ -1,15 +1,18 @@
 #include <string.h>
 #include "at.h"
 
-bool canBeScalar(Ret* r)
+bool canBeScalar(Ret* r) 
 {
 	Type* t = &r->type;
 
-	if(t->n >= 0)
-		return false;
+	if (t->n >= 0) 
+		return false;	// arrays are not scalar
 
-	if(t->tb == TB_VOID)
-		return false;
+	if (t->tb == TB_VOID) 
+		return false;  // void is not scalar
+
+	if (t->tb == TB_STRUCT) 
+		return false; // are not scalar
 
 	return true;
 }
@@ -55,7 +58,8 @@ bool arithTypeTo(Type *t1, Type *t2, Type *dst)
 	// there are no arithmetic operations with pointers
 	if(t1->n >= 0 || t2->n >= 0)
 		return false;
-	// the result of an arithmetic operation cannot be poinetr or struct
+
+	// the result of an arithmetic operation cannot be pointer or struct
 	dst->s = NULL;
 	dst->n = -1;
 	
