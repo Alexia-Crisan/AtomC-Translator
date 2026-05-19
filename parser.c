@@ -996,7 +996,7 @@ bool exprPostfixPrim(Ret* r)
 	{
 		Ret idx;
 		if (!expr(&idx))
-			tkerr("AT: Missing or invalid index expression inside []");
+			tkerr("Missing or invalid index expression inside []");
 
 		if (r->type.n < 0)
 			tkerr("AT: Only an array can be indexed");
@@ -1049,7 +1049,8 @@ bool exprPrimary(Ret* r)
 		Token* tkName = consumedTk;
 
 		Symbol* s = findSymbol(tkName->text);
-		if (!s) tkerr("AT: Undefined id: %s", tkName->text);
+		if (!s) 
+			tkerr("AT: Undefined id: %s", tkName->text);
 
 		if (consume(LPAR))
 		{
@@ -1130,13 +1131,15 @@ bool exprPrimary(Ret* r)
 
 	if (consume(LPAR))
 	{
-		if (!expr(r))
-			tkerr("Missing or invalid expression inside parentheses");
+		if (expr(r))
+		{
+			if (!consume(RPAR))
+				tkerr("Missing ')' after parenthesised expression");
 
-		if (!consume(RPAR))
-			tkerr("Missing ) after parenthesised expression");
+			return true;
+		}
 
-		return true;
+		iTk = start;
 	}
 
 	iTk = start;

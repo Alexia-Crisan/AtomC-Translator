@@ -11,9 +11,6 @@ bool canBeScalar(Ret* r)
 	if (t->tb == TB_VOID) 
 		return false;  // void is not scalar
 
-	if (t->tb == TB_STRUCT) 
-		return false; // are not scalar
-
 	return true;
 }
 

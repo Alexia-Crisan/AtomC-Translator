@@ -20,8 +20,10 @@
 struct S { int n; };
 struct S a;
 
+void doi();
+
 void test1() {
-    if (a) {}
+    if (doi) {}
 }
 
 
@@ -336,7 +338,7 @@ struct S a;
 
 void test25() {
     int x;
-    x = a.missing;
+    x = a.doi;
 }
 
 
