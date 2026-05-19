@@ -102,3 +102,8 @@ Symbol* addSymbolToDomain(Domain* d, Symbol* s);
 Symbol* addExtFn(const char* name, void(*extFnPtr)(), Type ret);
 // appends a parameter to fn (no redefinition check)
 Symbol* addFnParam(Symbol* fn, const char* name, Type type);
+
+// VM stage addition: adds an externally-linked function to the current domain
+Symbol* addExtFn(const char* name, void(*extFnPtr)(), Type ret);
+// VM stage addition: appends a parameter to fn (no redefinition check)
+Symbol* addFnParam(Symbol* fn, const char* name, Type type);
