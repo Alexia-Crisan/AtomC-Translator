@@ -17,13 +17,13 @@
 // Rule:  "the if condition must be a scalar value"
 // Cause: using a struct as the if condition (structs are not scalar)
 // ────────────────────────────────────────────────────────────
-struct S { int n; };
-struct S a;
-
-void doi();
+void doi() 
+{
+    int a;
+}
 
 void test1() {
-    if (doi) {}
+    if (doi()) {}
 }
 
 
@@ -32,11 +32,13 @@ void test1() {
 // Rule:  "the while condition must be a scalar value"
 // Cause: using a struct as the while condition
 // ────────────────────────────────────────────────────────────
-struct S { int n; };
-struct S a;
+void doi() 
+{
+    int a;
+}
 
 void test2() {
-    while (a) {}
+    while (doi()) {}
 }
 
 
