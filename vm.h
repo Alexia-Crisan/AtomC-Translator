@@ -29,7 +29,11 @@ typedef enum
 	OP_FPLOAD,	 // [idx] puts on stack the value from FP[idx]
 	OP_FPSTORE,	 // [idx] puts in FP[idx] the value from stack
 	OP_ADD_I,	 // adds 2 int values from stack and puts the result on stack
-	OP_LESS_I	 // compares 2 int values from stack and puts the result on stack as int
+	OP_LESS_I,	 // compares 2 int values from stack and puts the result on stack as int
+	//VM new
+	OP_PUSH_F,	 // [ct.f] puts on stack the constant ct.f (double)
+	OP_ADD_F,	 // adds 2 double values from stack and puts the result on stack
+	OP_LESS_F	 // compares 2 double values from stack; pushes int result (0 or 1)
 } Opcode;
 
 typedef struct Instr Instr;
@@ -39,9 +43,9 @@ typedef union
 {
 	int i;			// int and index values
 	double f;		// float values
-	void *p;		// pointers
+	void* p;		// pointers
 	void(*extFnPtr)();	// pointer to an extern (host) function
-	Instr *instr;		// pointer to an instruction
+	Instr* instr;		// pointer to an instruction
 } Val;
 
 // a VM instruction
@@ -49,24 +53,27 @@ struct Instr
 {
 	Opcode op;		// opcode: OP_*
 	Val arg;
-	Instr *next;	// the link to the next instruction in list
+	Instr* next;	// the link to the next instruction in list
 };
 
 // adds a new instruction to the end of list and sets its "op" field
 // returns the newly added instruction
-Instr *addInstr(Instr **list,Opcode op);
+Instr* addInstr(Instr** list, Opcode op);
 
 // add an instruction which has an argument of type int
-Instr *addInstrWithInt(Instr **list,Opcode op,int argVal);
+Instr* addInstrWithInt(Instr** list, Opcode op, int argVal);
 
 // add an instruction which has an argument of type double
-Instr *addInstrWithDouble(Instr **list,Opcode op,double argVal);
+Instr* addInstrWithDouble(Instr** list, Opcode op, double argVal);
 
-// MV initialisation
+// MV initialisation - registers built-in external functions
 void vmInit();
 
 // executes the code starting with the given instruction (IP - Instruction Pointer)
-void run(Instr *IP);
+void run(Instr* IP);
 
-// generates a test program
-Instr *genTestProgram();
+// generates the original int test program
+Instr* genTestProgram();
+
+// generates the homework double test program
+Instr* genTestProgramDouble();
