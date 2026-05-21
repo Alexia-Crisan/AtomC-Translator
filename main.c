@@ -28,9 +28,9 @@ int main()
     parse(tks);      // 3. parse + domain analysis + type analysis
     printf("Syntax OK\n");
 
-    printf("\n=== genTestProgram (int) ===\n");
+    /*printf("\n=== genTestProgram (int) ===\n");
     Instr* testCode = genTestProgram();
-    run(testCode);
+    run(testCode);*/
 
     printf("\n\n=== genTestProgramDouble (double, homework) ===\n");
     Instr* testCodeDouble = genTestProgramDouble();

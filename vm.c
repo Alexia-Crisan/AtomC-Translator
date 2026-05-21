@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "ad.h"
+#include "vm.h"  
 
 Instr* addInstr(Instr** list, Opcode op)
 {

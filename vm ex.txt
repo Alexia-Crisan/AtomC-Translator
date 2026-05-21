@@ -1,2 +1,36 @@
-cl main.c lexer.c parser.c utils.c ad.c
-.\main.exe
+f(2.0);
+void f(double n){		
+	double i=0.0;
+	while(i<n){
+		put_d(i);
+		i=i+0.5;
+	}
+}
+
+Cadrul functiei: 
+-2    -1        0        1
+n  adr_return  old_FP    i
+
+PUSH.f 0
+CALL f
+HALT
+
+f: ENTER 1
+   PUSH.f 0
+   FPSTORE 1
+
+F1: FPLOAD 1
+    FPLOAD -2
+    LESS.f 
+    JF F2
+
+    FPLOAD 1
+    CALL_EXT put_d
+
+    FPLOAD 1
+    PUSH.f 0.5
+    ADD.f
+    FPSTORE 1
+    JMP F1
+
+F2: RET_VOID
