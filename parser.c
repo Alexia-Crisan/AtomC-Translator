@@ -7,6 +7,7 @@
 #include "at.h"
 #include "parser.h"
 #include "utils.h"
+#include "vm.h"
 
 Token* iTk;			// the iterator in the tokens list
 Token* consumedTk;	// the last consumed token
@@ -285,6 +286,9 @@ bool fnDef()
 				owner = fn;   // AD: set owner to this function
 				pushDomain(); // AD: open function local domain right after LPAR
 
+				// CG: add ENTER (argument will be set after parsing body)
+				addInstr(&fn->fn.instr, OP_ENTER);
+
 				if (fnParam())
 				{
 					while (consume(COMMA))
@@ -298,6 +302,13 @@ bool fnDef()
 				{
 					if (stmCompound(false))
 					{
+						// CG: set ENTER argument
+						fn->fn.instr->arg.i = symbolsLen(fn->fn.locals);
+
+						// CG: if void function, add RET_VOID at end
+						if (fn->type.tb == TB_VOID)
+							addInstrWithInt(&fn->fn.instr, OP_RET_VOID, symbolsLen(fn->fn.params));
+
 						dropDomain(); // AD: close function's domain
 						owner = NULL; // AD: leave function scope
 						return true;
@@ -360,6 +371,9 @@ bool stm()
 	Token* start = iTk;
 	Ret rCond, rExpr; // AT: local Ret accumulators
 
+	// CG: save instruction list position for backtracking
+	Instr* startInstr = owner ? lastInstr(owner->fn.instr) : NULL;
+
 	if (stmCompound(true)) return true;
 
 	if (consume(IF))
@@ -372,15 +386,33 @@ bool stm()
 				if (!canBeScalar(&rCond))
 					tkerr("AT: The if condition must be a scalar value");
 
+				// CG: load value if lval, convert to int if needed, emit JF
+				addRVal(&owner->fn.instr, rCond.lval, &rCond.type);
+				Type intType = { TB_INT, NULL, -1 };
+				insertConvIfNeeded(lastInstr(owner->fn.instr), &rCond.type, &intType);
+				Instr* ifJF = addInstr(&owner->fn.instr, OP_JF);
+
 				if (consume(RPAR))
 				{
 					if (stm())
 					{
 						if (consume(ELSE))
 						{
+							// CG: JMP over else, patch JF to else start
+							Instr* ifJMP = addInstr(&owner->fn.instr, OP_JMP);
+							ifJF->arg.instr = addInstr(&owner->fn.instr, OP_NOP);
+
 							if (!stm()) 
 								tkerr("Expected statement after else");
+
+							ifJMP->arg.instr = addInstr(&owner->fn.instr, OP_NOP);
 						}
+						else
+						{
+							// CG: patch JF to after if body
+							ifJF->arg.instr = addInstr(&owner->fn.instr, OP_NOP);
+						}
+
 						return true;
 					}
 
@@ -400,16 +432,30 @@ bool stm()
 	{
 		if (consume(LPAR))
 		{
+			// CG: save position just before the condition (for JMP back)
+			Instr* beforeWhileCond = lastInstr(owner->fn.instr);
+
 			if (expr(&rCond)) // AT: collect condition type
 			{
 				// AT: while condition must be scalar
 				if (!canBeScalar(&rCond))
 					tkerr("AT: The while condition must be a scalar value");
 
+				// CG: load, convert, emit JF
+				addRVal(&owner->fn.instr, rCond.lval, &rCond.type);
+				Type intType = { TB_INT, NULL, -1 };
+				insertConvIfNeeded(lastInstr(owner->fn.instr), &rCond.type, &intType);
+				Instr* whileJF = addInstr(&owner->fn.instr, OP_JF);
+
 				if (consume(RPAR))
 				{						
 					if (stm())
+					{
+						// CG: JMP back to condition, patch JF to after body
+						addInstr(&owner->fn.instr, OP_JMP)->arg.instr = beforeWhileCond->next; whileJF->arg.instr = addInstr(&owner->fn.instr, OP_NOP);
+
 						return true;
+					}
 
 					tkerr("Expected statement after while(...)");
 				}
@@ -435,11 +481,19 @@ bool stm()
 
 			if (!convTo(&rExpr.type, &owner->type))
 				tkerr("AT: Cannot convert the return expression type to the function return type");
+
+			// CG: load return value, convert if needed, emit RET
+			addRVal(&owner->fn.instr, rExpr.lval, &rExpr.type);
+			insertConvIfNeeded(lastInstr(owner->fn.instr), &rExpr.type, &owner->type);
+			addInstrWithInt(&owner->fn.instr, OP_RET, symbolsLen(owner->fn.params));
 		}
 		else
 		{
 			if (owner->type.tb != TB_VOID)
 				tkerr("AT: A non-void function must return a value");
+
+			// CG: void return
+			addInstr(&owner->fn.instr, OP_RET_VOID);
 		}
 
 		if (consume(SEMICOLON)) 
@@ -450,6 +504,10 @@ bool stm()
 
 	if (expr(&rExpr))
 	{
+		// CG: if expression produces a non-void value, discard it
+		if (rExpr.type.tb != TB_VOID)
+			addInstr(&owner->fn.instr, OP_DROP);
+
 		if (!consume(SEMICOLON))
 			tkerr("Missing ; after expression statement");
 
@@ -458,7 +516,9 @@ bool stm()
 
 	if (consume(SEMICOLON)) return true;  // empty statement: just ;
 
+	// CG: backtrack - remove any generated instructions
 	iTk = start;
+	if (owner) delInstrAfter(startInstr);
 	return false;
 }
 
@@ -530,6 +590,16 @@ bool exprAssign(Ret* r)
 
 				if (!convTo(&r->type, &rDst.type))
 					tkerr("AT: The assign source cannot be converted to destination");
+
+				// CG: load rhs value, convert if needed, store to lhs address
+				addRVal(&owner->fn.instr, r->lval, &r->type);
+				insertConvIfNeeded(lastInstr(owner->fn.instr), &r->type, &rDst.type);
+				switch (rDst.type.tb)
+				{
+					case TB_INT:    addInstr(&owner->fn.instr, OP_STORE_I); break;
+					case TB_DOUBLE: addInstr(&owner->fn.instr, OP_STORE_F); break;
+					default: break;
+				}
 				
 				r->lval = false;
 				r->ct = true;
@@ -706,6 +776,10 @@ bool exprRelPrim(Ret* r)
 {
 	if (consume(LESS))
 	{
+		// CG: save position before left value, emit left value load
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprAdd(&right))
 			tkerr("Missing or invalid operand after <");
@@ -715,6 +789,17 @@ bool exprRelPrim(Ret* r)
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: Invalid operand type for <");
 
+		// CG: emit right value load, conversions, comparison
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_LESS_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_LESS_F); break;
+		default: break;
+		}
+
 		*r = (Ret){ {TB_INT, NULL, -1}, false, true };
 
 		exprRelPrim(r);
@@ -723,14 +808,26 @@ bool exprRelPrim(Ret* r)
 
 	if (consume(LESSEQ))
 	{
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprAdd(&right))
 			tkerr("Missing or invalid operand after <=");
 
-		// AT: both operands must be scalar and non-struct
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: Invalid operand type for <=");
+
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_LESS_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_LESS_F); break;
+		default: break;
+		}
 
 		*r = (Ret){ {TB_INT, NULL, -1}, false, true };
 
@@ -740,14 +837,26 @@ bool exprRelPrim(Ret* r)
 
 	if (consume(GREATER))
 	{
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprAdd(&right))
 			tkerr("Missing or invalid operand after >");
 
-		// AT: both operands must be scalar and non-struct
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: Invalid operand type for >");
+
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_LESS_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_LESS_F); break;
+		default: break;
+		}
 
 		*r = (Ret){ {TB_INT, NULL, -1}, false, true };
 
@@ -757,14 +866,26 @@ bool exprRelPrim(Ret* r)
 
 	if (consume(GREATEREQ))
 	{
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprAdd(&right))
 			tkerr("Missing or invalid operand after >=");
 
-		// AT: both operands must be scalar and non-struct
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: Invalid operand type for >=");
+
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+			case TB_INT:    addInstr(&owner->fn.instr, OP_LESS_I); break;
+			case TB_DOUBLE: addInstr(&owner->fn.instr, OP_LESS_F); break;
+			default: break;
+		}
 
 		*r = (Ret){ {TB_INT, NULL, -1}, false, true };
 
@@ -796,6 +917,10 @@ bool exprAddPrim(Ret* r)
 {
 	if (consume(ADD))
 	{
+		// CG: save position before left value, emit left value load
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprMul(&right))
 			tkerr("Missing or invalid operand after +");
@@ -805,6 +930,17 @@ bool exprAddPrim(Ret* r)
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: invalid operand type for +");
 
+		// CG: emit right value load, conversions, ADD
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_ADD_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_ADD_F); break;
+		default: break;
+		}
+
 		*r = (Ret){ tDst, false, true };
 
 		exprAddPrim(r);
@@ -813,6 +949,10 @@ bool exprAddPrim(Ret* r)
 
 	if (consume(SUB))
 	{
+		// CG: save position before left value, emit left value load
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprMul(&right))
 			tkerr("Missing or invalid operand after -");
@@ -821,6 +961,17 @@ bool exprAddPrim(Ret* r)
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: invalid operand type for -");
+
+		// CG: emit right value load, conversions, SUB
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_SUB_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_SUB_F); break;
+		default: break;
+		}
 
 		*r = (Ret){ tDst, false, true };
 
@@ -852,6 +1003,10 @@ bool exprMulPrim(Ret* r)
 {
 	if (consume(MUL))
 	{
+		// CG: save position before left value, emit left value load
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprCast(&right))
 			tkerr("Missing or invalid operand after *");
@@ -861,6 +1016,17 @@ bool exprMulPrim(Ret* r)
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: Invalid operand type for *");
 
+		// CG: emit right value load, conversions, MUL
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_MUL_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_MUL_F); break;
+		default: break;
+		}
+
 		*r = (Ret){ tDst, false, true };
 
 		exprMulPrim(r);
@@ -869,6 +1035,10 @@ bool exprMulPrim(Ret* r)
 
 	if (consume(DIV))
 	{
+		// CG: save position before left value, emit left value load
+		Instr* lastLeft = lastInstr(owner->fn.instr);
+		addRVal(&owner->fn.instr, r->lval, &r->type);
+
 		Ret right;
 		if (!exprCast(&right))
 			tkerr("Missing or invalid operand after /");
@@ -877,6 +1047,17 @@ bool exprMulPrim(Ret* r)
 		Type tDst;
 		if (!arithTypeTo(&r->type, &right.type, &tDst))
 			tkerr("AT: Invalid operand type for /");
+
+		// CG: emit right value load, conversions, DIV
+		addRVal(&owner->fn.instr, right.lval, &right.type);
+		insertConvIfNeeded(lastLeft, &r->type, &tDst);
+		insertConvIfNeeded(lastInstr(owner->fn.instr), &right.type, &tDst);
+		switch (tDst.tb)
+		{
+		case TB_INT:    addInstr(&owner->fn.instr, OP_DIV_I); break;
+		case TB_DOUBLE: addInstr(&owner->fn.instr, OP_DIV_F); break;
+		default: break;
+		}
 
 		*r = (Ret){ tDst, false, true };
 
@@ -1069,6 +1250,10 @@ bool exprPrimary(Ret* r)
 				if (!convTo(&rArg.type, &param->type))
 					tkerr("AT: In call, cannot convert the argument type to the parameter type");
 
+				// CG: load argument value, convert if needed
+				addRVal(&owner->fn.instr, rArg.lval, &rArg.type);
+				insertConvIfNeeded(lastInstr(owner->fn.instr), &rArg.type, &param->type);
+
 				param = param->next;
 
 				while (consume(COMMA))
@@ -1092,12 +1277,62 @@ bool exprPrimary(Ret* r)
 			if (param)
 				tkerr("AT: Too few arguments in function call");
 
+			// CG: emit call — external function or VM function
+			if (s->fn.extFnPtr)
+			{
+				addInstr(&owner->fn.instr, OP_CALL_EXT)->arg.extFnPtr = s->fn.extFnPtr;
+			}
+			else
+			{
+				addInstr(&owner->fn.instr, OP_CALL)->arg.instr = s->fn.instr;
+			}
+
 			*r = (Ret){ s->type, false, true };
 		}
 		else
 		{
 			if (s->kind == SK_FN)
 				tkerr("AT: A function can only be called");
+
+			// CG: push address of the variable (lval = address on stack)
+			if (s->kind == SK_VAR)
+			{
+				if (s->owner == NULL)
+				{
+					// global variable: push its memory address
+					addInstr(&owner->fn.instr, OP_ADDR)->arg.p = s->varMem;
+				}
+				else
+				{
+					// local variable: push frame-relative address
+					switch (s->type.tb)
+					{
+						case TB_INT:
+							addInstrWithInt(&owner->fn.instr, OP_FPADDR_I, s->varIdx + 1);
+							break;
+						case TB_DOUBLE:
+							addInstrWithInt(&owner->fn.instr, OP_FPADDR_F, s->varIdx + 1);
+							break;
+						default: break;
+					}
+				}
+			}
+			if (s->kind == SK_PARAM)
+			{
+				// parameter: negative frame-relative address
+				switch (s->type.tb)
+				{
+					case TB_INT:
+						addInstrWithInt(&owner->fn.instr, OP_FPADDR_I,
+							s->paramIdx - symbolsLen(s->owner->fn.params) - 1);
+						break;
+					case TB_DOUBLE:
+						addInstrWithInt(&owner->fn.instr, OP_FPADDR_F,
+							s->paramIdx - symbolsLen(s->owner->fn.params) - 1);
+						break;
+					default: break;
+				}
+			}
 
 			*r = (Ret){ s->type, true, s->type.n >= 0 };
 		}
@@ -1106,18 +1341,27 @@ bool exprPrimary(Ret* r)
 
 	if (consume(INT))
 	{
+		// CG: push int constant
+		addInstrWithInt(&owner->fn.instr, OP_PUSH_I, consumedTk->i);
+
 		*r = (Ret){ {TB_INT, NULL, -1}, false, true };
 
 		return true;
 	}
 	if (consume(DOUBLE))
 	{
+		// CG: push double constant
+		addInstrWithDouble(&owner->fn.instr, OP_PUSH_F, consumedTk->d);
+
 		*r = (Ret){ {TB_DOUBLE, NULL, -1}, false, true };
 
 		return true;
 	}
 	if (consume(CHAR))
 	{
+		// CG: push char as int constant
+		addInstrWithInt(&owner->fn.instr, OP_PUSH_I, consumedTk->c);
+
 		*r = (Ret){ {TB_CHAR, NULL, -1}, false, true };
 
 		return true;

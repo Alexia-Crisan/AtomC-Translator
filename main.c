@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "vm.h"
 
-#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testvm.c"
+#define SOURCE_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tests\\testgc.c"
 #define OUTPUT_FILE "C:\\Users\\alcrisan\\OneDrive - Nokia\\Desktop\\Folders\\Uni\\LFTC\\LFTC_Translator\\tokens.txt"
 
 int main()
@@ -18,25 +18,24 @@ int main()
         err("Cannot open output file");
 
     showTokensDetailed(tks, out);
-
     fclose(out);
-
     printf("Tokens written to tokens.txt\n");
 
-    pushDomain();    // 1. create the global domain in the symbol table
-    vmInit();        // 2. register built-in functions (put_i, put_d)
-    parse(tks);      // 3. parse + domain analysis + type analysis
+    pushDomain();   // 1. create global domain
+    vmInit();       // 2. register put_i, put_d before parsing
+    parse(tks);     // 3. parse + AD + AT + code generation
     printf("Syntax OK\n");
 
-    /*printf("\n=== genTestProgram (int) ===\n");
-    Instr* testCode = genTestProgram();
-    run(testCode);*/
+    // 4. find main and run the compiled code
+    Symbol* symMain = findSymbolInDomain(symTable, "main");
+    if (!symMain) err("missing main function");
 
-    printf("\n\n=== genTestProgramDouble (double, homework) ===\n");
-    Instr* testCodeDouble = genTestProgramDouble();
-    run(testCodeDouble);
+    Instr* entryCode = NULL;
+    addInstr(&entryCode, OP_CALL)->arg.instr = symMain->fn.instr;
+    addInstr(&entryCode, OP_HALT);
+    run(entryCode);
 
-    dropDomain();     // 4. release global domain
+    dropDomain();   // 5. cleanup
 
     return 0;
 }

@@ -156,26 +156,6 @@ void vmInit()
 	addFnParam(fn, "d", (Type) { TB_DOUBLE, NULL, -1 });
 }
 
-void addRVal(Instr** list, int lval, Type* t)
-{
-	if (!lval) return;
-	switch (t->tb)
-	{
-	case TB_INT:    addInstr(list, OP_LOAD_I); break;
-	case TB_DOUBLE: addInstr(list, OP_LOAD_F); break;
-	default: break;
-	}
-}
-
-void insertConvIfNeeded(Instr* last, Type* src, Type* dst)
-{
-	if (src->tb == dst->tb) return;
-	if (src->tb == TB_INT && dst->tb == TB_DOUBLE)
-		insertInstr(last, OP_CONV_I_F);
-	else if (src->tb == TB_DOUBLE && dst->tb == TB_INT)
-		insertInstr(last, OP_CONV_F_I);
-}
-
 void run(Instr* IP)
 {
 	Val v;
