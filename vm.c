@@ -115,7 +115,7 @@ void put_i()
 
 void put_d()
 {
-	printf("=> %g", popf());
+	printf("=> %.2f", popf());
 }
 
 void vmInit()
