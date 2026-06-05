@@ -5,6 +5,7 @@
 
 #include "ad.h"
 #include "at.h"
+#include "gc.h" 
 #include "parser.h"
 #include "utils.h"
 #include "vm.h"
@@ -37,11 +38,8 @@ bool consume(int code)
 void parse(Token* tokens)
 {
 	iTk = tokens;
-	pushDomain();	// AD: create the global domain
-	if (!unit())
+	if (!unit()) 
 		tkerr("Syntax error");
-	showDomain(symTable, "global"); // AD: display global domain
-	dropDomain();                   // AD: release global domain
 }
 
 
@@ -568,6 +566,7 @@ bool expr(Ret* r)
 bool exprAssign(Ret* r)
 {
 	Token* start = iTk;
+	Instr* startInstr = owner ? lastInstr(owner->fn.instr) : NULL;
 	Ret rDst;
 
 	if (exprUnary(&rDst))
@@ -609,6 +608,7 @@ bool exprAssign(Ret* r)
 			tkerr("Expected expression after =");
 		}
 
+		if (owner) delInstrAfter(startInstr);
 		iTk = start; // backtrack
 	}
 
@@ -1077,6 +1077,8 @@ bool exprCast(Ret* r)
 
 	if (consume(LPAR))
 	{
+		Instr* startInstr = owner ? lastInstr(owner->fn.instr) : NULL; // CG
+
 		if (typeBase(&t))
 		{
 			arrayDecl(&t);
@@ -1105,6 +1107,7 @@ bool exprCast(Ret* r)
 		}
 
 		iTk = start;
+		if (owner) delInstrAfter(startInstr);
 	}
 
 	if (exprUnary(r)) 
