@@ -162,12 +162,10 @@ void run(Instr* IP)
 	int iArg, iTop, iBefore;
 	double fTop, fBefore;
 	void* pTop;
-
 	void(*extFnPtr)();
 
 	for (;;)
 	{
-		// shows the index of the current instruction and the number of values from stack
 		printf("%p/%d\t", IP, (int)(SP - stack + 1));
 		switch (IP->op)
 		{
@@ -210,6 +208,16 @@ void run(Instr* IP)
 			FP = FP[0].p;
 			break;
 
+		case OP_RET:
+			v = popv();
+			iArg = IP->arg.i;
+			printf("RET\t%d\t// i:%d, f:%g", iArg, v.i, v.f);
+			IP = FP[-1].p;
+			SP = FP - iArg - 2;
+			FP = FP[0].p;
+			pushv(v);
+			break;
+
 		case OP_JMP:
 			printf("JMP\t%p", IP->arg.instr);
 			IP = IP->arg.instr;
@@ -219,6 +227,12 @@ void run(Instr* IP)
 			iTop = popi();
 			printf("JF\t%p\t// %d", IP->arg.instr, iTop);
 			IP = iTop ? IP->next : IP->arg.instr;
+			break;
+
+		case OP_JT:
+			iTop = popi();
+			printf("JT\t%p\t// %d", IP->arg.instr, iTop);
+			IP = iTop ? IP->arg.instr : IP->next;
 			break;
 
 		case OP_FPLOAD:
@@ -243,6 +257,30 @@ void run(Instr* IP)
 			IP = IP->next;
 			break;
 
+		case OP_SUB_I:
+			iTop = popi();
+			iBefore = popi();
+			pushi(iBefore - iTop);
+			printf("SUB.i\t// %d-%d -> %d", iBefore, iTop, iBefore - iTop);
+			IP = IP->next;
+			break;
+
+		case OP_MUL_I:
+			iTop = popi();
+			iBefore = popi();
+			pushi(iBefore * iTop);
+			printf("MUL.i\t// %d*%d -> %d", iBefore, iTop, iBefore * iTop);
+			IP = IP->next;
+			break;
+
+		case OP_DIV_I:
+			iTop = popi();
+			iBefore = popi();
+			pushi(iBefore / iTop);
+			printf("DIV.i\t// %d/%d -> %d", iBefore, iTop, iBefore / iTop);
+			IP = IP->next;
+			break;
+
 		case OP_LESS_I:
 			iTop = popi();
 			iBefore = popi();
@@ -251,7 +289,6 @@ void run(Instr* IP)
 			IP = IP->next;
 			break;
 
-		// VM new
 		case OP_PUSH_F:
 			printf("PUSH.f\t%g", IP->arg.f);
 			pushf(IP->arg.f);
@@ -375,9 +412,10 @@ void run(Instr* IP)
 			IP = IP->next;
 			break;
 
-		default:err("VM: Unimplemented instruction: %d", IP->op);
-		
+		default:
+			err("VM: Unimplemented instruction: %d", IP->op);
 		}
+
 		putchar('\n');
 	}
 }
