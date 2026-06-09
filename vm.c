@@ -363,6 +363,13 @@ void run(Instr* IP)
 			IP = IP->next;
 			break;
 
+		case OP_FPADDR_F:
+			pTop = &FP[IP->arg.i].f;
+			pushp(pTop);
+			printf("FPADDR.f\t%d\t// %p", IP->arg.i, pTop);
+			IP = IP->next;
+			break;
+
 		case OP_LOAD_I:
 			pTop = popp();
 			pushi(*(int*)pTop);
