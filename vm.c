@@ -2,6 +2,7 @@
 
 #include "utils.h"
 #include "ad.h"
+#include "gc.h"
 #include "vm.h"  
 
 Instr* addInstr(Instr** list, Opcode op)
@@ -359,13 +360,6 @@ void run(Instr* IP)
 			pTop = &FP[IP->arg.i].i;
 			pushp(pTop);
 			printf("FPADDR.i\t%d\t// %p", IP->arg.i, pTop);
-			IP = IP->next;
-			break;
-
-		case OP_FPADDR_F:
-			pTop = &FP[IP->arg.i].f;
-			pushp(pTop);
-			printf("FPADDR.f\t%d\t// %p", IP->arg.i, pTop);
 			IP = IP->next;
 			break;
 

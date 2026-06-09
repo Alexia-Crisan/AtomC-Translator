@@ -38,7 +38,6 @@ typedef enum
 	OP_STORE_F,	 // takes from stack an address and double value, stores value at address, leaves value on stack
 	OP_ADDR,	 // [p] pushes on stack the given pointer
 	OP_FPADDR_I, // [idx] pushes on stack the address of FP[idx].i
-	OP_FPADDR_F, // [idx] pushes on stack the address of FP[idx].f
 	OP_ADD_F,	 // adds 2 double values from stack and puts the result on stack
 	OP_SUB_I,	 // subtracts 2 int values from the top of the stack and puts the result on stack
 	OP_SUB_F,	 // subtracts 2 double values from the top of the stack and puts the result on stack
